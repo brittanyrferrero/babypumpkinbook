@@ -96,7 +96,7 @@ h1{font-size:2.35rem;line-height:1.1;margin:0 0 .35rem}
 .fact p{margin:0 0 .75em}.fact p:last-child{margin:0}
 .fact strong{color:var(--accent)}
 .audio{margin:1.4rem 0 0}
-.play{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;border:0;border-radius:999px;padding:1.05rem 1.25rem;font:inherit;font-size:1.15rem;font-weight:800;background:linear-gradient(180deg,var(--accent-2),var(--accent));color:var(--accent-ink);cursor:pointer;box-shadow:0 6px 0 rgba(150,70,10,.25);transition:transform .08s,box-shadow .08s}
+.play{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;min-height:4.25rem;border:0;border-radius:999px;padding:1.1rem 1.25rem;font:inherit;font-size:1.35rem;font-weight:800;background:linear-gradient(180deg,var(--accent-2),var(--accent));color:var(--accent-ink);cursor:pointer;box-shadow:0 6px 0 rgba(150,70,10,.25);transition:transform .08s,box-shadow .08s}
 .play:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(150,70,10,.25)}
 .play[aria-pressed="true"]{background:var(--muted);box-shadow:none}
 audio{width:100%;margin-top:.75rem;border-radius:999px}
@@ -164,7 +164,7 @@ function factPage(p, f) {
   const audio = audioSrc
     ? `<div class="audio">
 <button class="play" id="play" type="button" aria-pressed="false">▶ &nbsp;Listen</button>
-<audio id="a" src="${audioSrc}" preload="auto" controls></audio>
+<audio id="a" src="${audioSrc}" preload="auto"></audio>
 </div>
 <script>
 (function(){
@@ -173,8 +173,6 @@ function factPage(p, f) {
   a.addEventListener("play",function(){b.textContent="❚❚  Pause";b.setAttribute("aria-pressed","true")});
   a.addEventListener("pause",function(){b.textContent="▶  Listen";b.setAttribute("aria-pressed","false")});
   a.addEventListener("ended",function(){b.textContent="↻  Listen again";b.setAttribute("aria-pressed","false")});
-  // Try to start automatically; phones usually block this until a tap, and that's fine.
-  var t=a.play(); if(t&&t.catch){t.catch(function(){})}
 })();
 </script>`
     : "";

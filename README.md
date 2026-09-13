@@ -40,6 +40,19 @@ content/
 Edit right on GitHub (open a file, click the pencil, commit) or clone the repo.
 Vercel rebuilds automatically on every commit to `main`.
 
+## Generating audio with the AI voices
+
+Until (or instead of) a human recording, `generate_audio.py` reads every fact
+that has no audio yet, in the same two cloned voices as the wizards poker wand,
+picked 50/50 per fact. It never overwrites an existing recording, so dropping a
+real `03.m4a` next to `03.md` wins. Runs on tinkerbox:
+
+```
+cd ~/claude/babypumpkinbook
+PATH=/opt/homebrew/bin:$PATH ~/claude/tts_eval/.venv-omni/bin/python generate_audio.py
+git add content && git commit -m "audio" && git push
+```
+
 ## Running it locally
 
 Needs Node 20 or newer, nothing else.
