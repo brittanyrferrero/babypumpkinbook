@@ -79,7 +79,6 @@ h1{font-size:2.35rem;line-height:1.1;margin:0 0 .35rem}
 .cover{width:100%;border-radius:1.25rem;margin:0 0 1.25rem;display:block;border:2px solid var(--line);box-shadow:var(--shadow)}
 .fact{position:relative;background:var(--paper);border:2px solid var(--line);border-radius:1.5rem;padding:1.5rem 1.4rem 1.4rem;font-size:1.4rem;line-height:1.42;box-shadow:var(--shadow);transform:rotate(-.6deg)}
 .fact>*{transform:rotate(.6deg)}
-.fact::before{content:"”";position:absolute;top:-.55rem;right:1.1rem;font-family:"Fraunces",Georgia,serif;font-size:4rem;line-height:1;color:var(--accent-2);transform:none}
 .fact p{margin:0 0 .75em}.fact p:last-child{margin:0}
 .fact strong{color:var(--accent)}
 .audio{margin:1.4rem 0 0}
@@ -168,7 +167,6 @@ function factPage(p, f) {
   return shell({
     title: `${p.title} · fact ${f.n}`,
     body: `${p.emoji ? `<div class="sticker" aria-hidden="true">${p.emoji}</div>` : ""}
-<p class="eyebrow">Did you know?</p>
 <h1 class="display">${esc(p.title)}</h1>
 ${p.blurb ? `<p class="blurb">${inline(p.blurb)}</p>` : ""}
 ${cover}
