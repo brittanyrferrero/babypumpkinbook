@@ -1,0 +1,12 @@
+{
+  "name": "babypumpkinbook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NFC-linked fact pages for Pumpkin's baby book",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs && npx --yes serve dist"
+  },
+  "engines": { "node": ">=20" }
+}
