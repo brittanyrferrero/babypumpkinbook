@@ -12,6 +12,7 @@ about a minute.
 |---|---|
 | `/p/3` | **This is what goes on the tag.** Page 3 of the book. Picks a random fact for that page and jumps to it. Won't repeat the last fact shown on that phone. |
 | `/p/3/2` | One specific fact, with its audio. |
+| `/random` | A random fact from a random page. Nice for a tag on the cover, or just a link to share. |
 | `/` | A plain list of all pages, for us, not for the reader. |
 
 ## Adding or editing content (no coding needed)

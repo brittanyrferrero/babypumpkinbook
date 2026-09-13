@@ -8,6 +8,7 @@
 //
 //   dist/p/<N>               -> picks a random fact and jumps to it  (this is the URL on the NFC tag)
 //   dist/p/<N>/<n>           -> one fact, with its audio
+//   dist/random              -> random page, random fact
 //   dist/tags.json, tags.txt -> slug -> URL list for writing the tags
 //
 // No dependencies. Run with `node build.mjs`. Set SITE_URL to get absolute URLs
@@ -100,7 +101,7 @@ h1{font-size:2.35rem;line-height:1.1;margin:0 0 .35rem}
 .play[aria-pressed="true"]{background:var(--muted);box-shadow:none}
 audio{width:100%;margin-top:.75rem;border-radius:999px}
 .actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.4rem}
-.btn{flex:1 1 10rem;text-align:center;text-decoration:none;border:2px solid var(--accent);color:var(--accent);border-radius:999px;padding:.85rem 1rem;font-weight:800;background:var(--paper)}
+.btn{display:inline-block;flex:1 1 10rem;text-align:center;text-decoration:none;border:2px solid var(--accent);color:var(--accent);border-radius:999px;padding:.85rem 1rem;font-weight:800;background:var(--paper)}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 footer{text-align:center;color:var(--muted);font-size:.95rem;padding:1rem 1.25rem 1.6rem}
 footer a{color:inherit}
@@ -188,12 +189,38 @@ ${audio}`,
   });
 }
 
+// /random : random page, then random fact on it. Avoids the last one shown on this phone.
+function randomAnyPage() {
+  const table = JSON.stringify(Object.fromEntries(pages.map((p) => [p.slug, p.facts.map((f) => f.n)])));
+  const links = pages.map((p) => `<li><a href="/p/${p.slug}">${esc(p.title)}</a></li>`).join("");
+  return shell({
+    title: "A random wonder",
+    head: `<script>
+(function(){
+  var t=${table}, slugs=Object.keys(t), last=null;
+  try{last=localStorage.getItem("last-any")}catch(e){}
+  var all=[]; slugs.forEach(function(s){ t[s].forEach(function(n){ all.push(s+"/"+n) }) });
+  var pool=all.length>1?all.filter(function(x){return x!==last}):all;
+  var s=slugs[Math.floor(Math.random()*slugs.length)];
+  var ns=t[s].filter(function(n){return pool.indexOf(s+"/"+n)>=0});
+  if(!ns.length){ s=pool[0].split("/")[0]; ns=[pool[0].split("/")[1]]; }
+  var pick=s+"/"+ns[Math.floor(Math.random()*ns.length)];
+  try{localStorage.setItem("last-any",pick)}catch(e){}
+  location.replace("/p/"+pick);
+})();
+</script>`,
+    body: `<h1 class="display">Picking a wonder…</h1>
+<noscript><p>Pick a page:</p><ul>${links}</ul></noscript>`,
+  });
+}
+
 function indexPage() {
   const items = pages.map((p) => `<li><span class="em" aria-hidden="true">${p.emoji || "📖"}</span><div><a href="/p/${p.slug}">Page ${esc(p.slug)} · ${esc(p.title)}</a><small>${p.facts.length} fact${p.facts.length === 1 ? "" : "s"}${p.facts.filter((f) => f.audio).length ? `, ${p.facts.filter((f) => f.audio).length} with audio` : ""} · tag URL: <code>/p/${p.slug}</code></small></div></li>`).join("\n");
   return shell({
     title: "Pumpkin's book of wonders",
     body: `<p class="eyebrow">Index</p><h1 class="display">Pumpkin's book of wonders</h1>
 <p class="blurb">Each page of the book has a tag. Scan it and a fact pops up. This list is just for the grown-ups.</p>
+<p><a class="btn primary" href="/random">Surprise me ✦</a></p>
 <ul class="pages">${items}</ul>`,
   });
 }
@@ -204,6 +231,7 @@ mkdirSync(DIST, { recursive: true });
 const out = (rel, text) => { mkdirSync(join(DIST, rel, ".."), { recursive: true }); writeFileSync(join(DIST, rel), text); };
 
 out("index.html", indexPage());
+out("random/index.html", randomAnyPage());
 const tags = {};
 for (const p of pages) {
   out(`p/${p.slug}/index.html`, randomPage(p));
