@@ -11,7 +11,7 @@ about a minute.
 | URL | What it does |
 |---|---|
 | `/p/elephant` | **This is what goes on the tag.** Picks a random elephant fact and jumps to it. Won't repeat the last fact shown on that phone. |
-| `/p/elephant/2` | One specific fact, with its audio and an "Another one" button. |
+| `/p/elephant/2` | One specific fact, with its audio. |
 | `/` | A plain list of all pages, for us, not for the reader. |
 
 ## Adding or editing content (no coding needed)

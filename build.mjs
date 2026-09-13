@@ -173,10 +173,7 @@ function factPage(p, f) {
 ${p.blurb ? `<p class="blurb">${inline(p.blurb)}</p>` : ""}
 ${cover}
 <div class="fact">${f.html}</div>
-${audio}
-<div class="actions">
-<a class="btn primary" href="/p/${p.slug}">Another one</a>
-</div>`,
+${audio}`,
   });
 }
 
