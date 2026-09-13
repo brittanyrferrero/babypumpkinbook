@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """
-Batch TTS for the fact pages. Same engine and voices as wizards-poker-wand.
+Batch TTS for the fact pages. Same engine and post-processing as wizards-poker-wand.
 
 Reads:  content/<N>-<name>/NN.md        (one fact per file)
 Writes: content/<N>-<name>/NN.mp3       (44.1 kHz mono, 192 kbps, loudness-normalised)
 Skips facts that already have audio of any kind (mp3/m4a/ogg/wav), so a
 human recording dropped next to a fact is never overwritten. Safe to resume.
 
-Voice: deterministic 50/50 malone2 / femme2, hashed on "<folder>/<NN>".
+Voices: voices.json (Eamon and Brittany today). Each fact gets one voice,
+picked deterministically by hashing "<folder>/<NN>" across the enabled voices.
+Add a friend: prep_voice.py, then a voices.json entry. To re-voice existing
+facts with the new mix, delete their mp3s and rerun.
 
 Runs on tinkerbox (needs the OmniVoice venv + ffmpeg):
     cd ~/claude/babypumpkinbook
@@ -24,21 +27,34 @@ import time
 from pathlib import Path
 
 CONTENT     = Path(__file__).parent / "content"
-SCRIPTS_DIR = Path("~/claude/tts_eval/scripts").expanduser()
+VOICES_JSON = Path(__file__).parent / "voices.json"
 AUDIO_EXT   = {".mp3", ".m4a", ".ogg", ".wav"}
-
-VOICES = [
-    # (name, ref_wav, instruct, volume)  — identical to wizards-poker-wand/generate_audio.py
-    ("malone2", SCRIPTS_DIR / "malone_2.wav",      "male, low pitch, middle-aged",        1.0),
-    ("femme2",  SCRIPTS_DIR / "femme_fatal_2.wav", "female, moderate pitch, middle-aged", 1.45),
-]
-
 TRAILING_SILENCE = 0.6  # seconds
 
 
-def voice_for(key):
+def load_voices():
+    """Enabled voices from voices.json, in file order. See prep_voice.py to add one."""
+    import json
+    cfg = json.loads(VOICES_JSON.read_text())
+    vdir = Path(cfg["voices_dir"]).expanduser()
+    voices = []
+    for v in cfg["voices"]:
+        if not v.get("enabled", True):
+            continue
+        ref = vdir / v["ref"]
+        if not ref.exists():
+            raise SystemExit(f"voice '{v['name']}': reference not found: {ref}")
+        voices.append({"name": v["name"], "ref": ref, "instruct": v["instruct"],
+                       "gain": float(v.get("gain", 1.0)), "speed": float(v.get("speed", 1.0))})
+    if not voices:
+        raise SystemExit("no enabled voices in voices.json")
+    return voices
+
+
+def voice_for(key, n):
+    """Deterministic pick among n voices, hashed on the fact key."""
     h = int(hashlib.md5(key.encode()).hexdigest(), 16)
-    return h % 2  # 0 = malone2, 1 = femme2
+    return h % n
 
 
 def plain_text(md):
@@ -61,27 +77,27 @@ def find_facts():
     return facts
 
 
-def load_model_and_prompts():
+def load_model_and_prompts(voices):
     import torch
     from omnivoice import OmniVoice
     device = "mps" if torch.backends.mps.is_available() else "cpu"
     print(f"[omni] loading model on {device}...", flush=True)
     model = OmniVoice.from_pretrained("k2-fsa/OmniVoice", device_map=device, torch_dtype=torch.float16)
     prompts = []
-    for name, ref_path, _, _vol in VOICES:
-        print(f"[omni] encoding voice ref {ref_path.name}...", flush=True)
-        prompts.append(model.create_voice_clone_prompt(str(ref_path)))
+    for v in voices:
+        print(f"[omni] encoding voice ref {v['ref'].name} ({v['name']})...", flush=True)
+        prompts.append(model.create_voice_clone_prompt(str(v["ref"])))
     return model, prompts
 
 
-def generate_clip(model, prompt, instruct, text, out_mp3, volume=1.0):
+def generate_clip(model, prompt, voice, text, out_mp3):
     import numpy as np
     import soundfile as sf
     sr = model.sampling_rate
-    arrays = model.generate(text=text, voice_clone_prompt=prompt, instruct=instruct,
-                            language="en", postprocess_output=True)
+    arrays = model.generate(text=text, voice_clone_prompt=prompt, instruct=voice["instruct"],
+                            speed=voice["speed"], language="en", postprocess_output=True)
     audio = np.concatenate([a for a in arrays if a is not None])
-    audio = audio * volume
+    audio = audio * voice["gain"]
     audio = np.concatenate([audio, np.zeros(int(sr * TRAILING_SILENCE))])
 
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
@@ -106,26 +122,28 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="list what would be generated")
     args = ap.parse_args()
 
+    voices = load_voices()
     facts = find_facts()
     if args.only:
         facts = [f for f in facts if f[0] in set(args.only)]
     todo = [f for f in facts if not f[3]]
+    print(f"Voices: {', '.join(v['name'] for v in voices)}")
     print(f"Facts: {len(facts)} total, {len(facts) - len(todo)} already have audio, {len(todo)} to generate")
     for key, md, _, _ in todo:
-        print(f"  {key:16s} [{VOICES[voice_for(key)][0]}]  {plain_text(md.read_text())[:70]}")
+        print(f"  {key:16s} [{voices[voice_for(key, len(voices))]['name']}]  {plain_text(md.read_text())[:70]}")
     if not todo or args.dry_run:
         return
 
-    model, prompts = load_model_and_prompts()
+    model, prompts = load_model_and_prompts(voices)
     t_start = time.monotonic()
     for i, (key, md, out_mp3, _) in enumerate(todo, 1):
-        vi = voice_for(key)
-        name, _, instruct, volume = VOICES[vi]
+        vi = voice_for(key, len(voices))
+        v = voices[vi]
         t0 = time.monotonic()
-        dur = generate_clip(model, prompts[vi], instruct, plain_text(md.read_text()), out_mp3, volume)
+        dur = generate_clip(model, prompts[vi], v, plain_text(md.read_text()), out_mp3)
         elapsed = time.monotonic() - t0
         eta = (time.monotonic() - t_start) / i * (len(todo) - i)
-        print(f"[{i}/{len(todo)}] {key} [{name}]  {dur:.1f}s audio  {elapsed:.0f}s gen  ETA {eta/60:.0f}m", flush=True)
+        print(f"[{i}/{len(todo)}] {key} [{v['name']}]  {dur:.1f}s audio  {elapsed:.0f}s gen  ETA {eta/60:.0f}m", flush=True)
     print(f"\nDone. {len(todo)} clips in {(time.monotonic() - t_start) / 60:.1f} min")
 
 

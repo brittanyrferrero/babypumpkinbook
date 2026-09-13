@@ -43,15 +43,58 @@ Vercel rebuilds automatically on every commit to `main`.
 ## Generating audio with the AI voices
 
 Until (or instead of) a human recording, `generate_audio.py` reads every fact
-that has no audio yet, in the same two cloned voices as the wizards poker wand,
-picked 50/50 per fact. It never overwrites an existing recording, so dropping a
-real `03.m4a` next to `03.md` wins. Runs on tinkerbox:
+that has no audio yet in one of the cloned voices in `voices.json` (Eamon and
+Brittany today, same references as the wizards poker wand). Each fact gets one
+voice, picked by a stable hash so reruns don't reshuffle. It never overwrites an
+existing recording, so dropping a real `03.m4a` next to `03.md` wins. Runs on
+tinkerbox:
 
 ```
 cd ~/claude/babypumpkinbook
 PATH=/opt/homebrew/bin:$PATH ~/claude/tts_eval/.venv-omni/bin/python generate_audio.py
 git add content && git commit -m "audio" && git push
 ```
+
+### Adding a friend's voice
+
+The voice references are real people's recordings and stay **out of this
+public repo**, in `~/claude/pumpkin-voices/` on tinkerbox. `voices.json` only
+points at them by filename.
+
+1. **Get a recording.** Phone voice memo is fine. Ask for 15 to 20 seconds of
+   natural talking in a quiet room: no music, no other voices, phone about a
+   hand's width from the mouth, and a normal reading pace. Reading one of the
+   facts aloud works well. Warm, relaxed delivery clones better than
+   "announcer voice".
+2. **Prep it** (trims silence, makes it mono 44.1 kHz, level-matches it so no
+   gain fiddling is needed):
+   ```
+   python prep_voice.py sam ~/Downloads/sam-memo.m4a            # whole memo
+   python prep_voice.py sam ~/Downloads/sam-memo.m4a --start 4 --end 22
+   ```
+   It prints the duration and a ready-made `voices.json` entry.
+3. **Add the entry to `voices.json`.** Set `instruct` to describe the real
+   speaker, e.g. `"female, high pitch, young adult"` or `"male, low pitch,
+   elderly"`. That string steers the model's pitch and age; it's the only pitch
+   control there is. Leave `gain` at 1.0 for prepped voices.
+4. **Voice the facts.** New facts pick from all enabled voices automatically. To
+   re-voice existing facts with the new mix, delete their mp3s first
+   (`rm content/*/*.mp3` for everything, or just the ones you want), then run
+   `generate_audio.py`.
+
+To take a voice out of rotation without deleting it, set `"enabled": false`.
+
+### How the levels are handled
+
+- The output pipeline trims leading silence and normalises every clip to
+  -16 LUFS with a -1.5 dBTP ceiling, so all voices play at the same loudness
+  on the phone regardless of how loud the reference was.
+- The two original references were raw takes at very different levels
+  (Eamon's about -29 LUFS, Brittany's about -38), which is why Brittany's entry
+  carries a 1.45 gain. References made by `prep_voice.py` are normalised to
+  -23 LUFS up front, so new voices don't need that knob.
+- Pitch is never shifted. The clone follows the reference and the `instruct`
+  hint.
 
 ## Running it locally
 

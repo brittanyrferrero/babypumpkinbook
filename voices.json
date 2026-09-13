@@ -1,0 +1,26 @@
+{
+  "_readme": "Voices for generate_audio.py. Reference recordings live OUTSIDE this public repo, in ~/claude/pumpkin-voices on tinkerbox. Add a friend with prep_voice.py, then add an entry here. 'gain' is a pre-normalisation multiplier the older refs needed because they were recorded at different levels; refs made by prep_voice.py are level-matched and use 1.0. 'instruct' steers pitch/age/gender and should describe the real speaker.",
+  "voices_dir": "~/claude/pumpkin-voices",
+  "voices": [
+    {
+      "name": "eamon",
+      "person": "Eamon",
+      "ref": "malone_2.wav",
+      "instruct": "male, low pitch, middle-aged",
+      "gain": 1.0,
+      "speed": 1.0,
+      "enabled": true,
+      "note": "Same reference as the wand's malone2 voice."
+    },
+    {
+      "name": "brittany",
+      "person": "Brittany",
+      "ref": "femme_fatal_2.wav",
+      "instruct": "female, moderate pitch, middle-aged",
+      "gain": 1.45,
+      "speed": 1.0,
+      "enabled": true,
+      "note": "Same reference as the wand's femme2 voice. Ref is ~9 dB quieter than Eamon's, hence the gain."
+    }
+  ]
+}
