@@ -21,6 +21,16 @@
       "speed": 1.0,
       "enabled": true,
       "note": "Same reference as the wand's femme2 voice. Ref is ~9 dB quieter than Eamon's, hence the gain."
+    },
+    {
+      "name": "vieta",
+      "person": "Vieta",
+      "ref": "vieta.wav",
+      "instruct": "female, moderate pitch, young adult",
+      "gain": 1.0,
+      "speed": 1.0,
+      "enabled": true,
+      "note": "Prepped with prep_voice.py from a 9.7 s iMessage audio message, trimmed to 6.7 s of speech."
     }
   ]
 }
