@@ -38,10 +38,10 @@ def measure(path):
     out = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(path), "-af",
                           f"loudnorm=I={TARGET_LUFS}:TP={TARGET_TP}:LRA=11:print_format=json",
                           "-f", "null", "-"], capture_output=True, text=True)
-    m = re.search(r"\{[^{}]*\}\s*$", out.stderr, re.S)
-    if not m:
+    blocks = re.findall(r"\{[^{}]*\}", out.stderr, re.S)
+    if not blocks:
         sys.exit(f"could not measure loudness:\n{out.stderr[-800:]}")
-    return json.loads(m.group(0))
+    return json.loads(blocks[-1])
 
 
 def main():
