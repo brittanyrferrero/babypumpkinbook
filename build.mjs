@@ -1,12 +1,13 @@
 // Builds the static site from content/ into dist/.
 //
-//   content/<slug>/page.md   -> "# Title" on the first line, optional blurb after
-//   content/<slug>/NN.md     -> one fact per file (01.md, 02.md, ...)
-//   content/<slug>/NN.mp3    -> optional audio for that fact (mp3, m4a, ogg, wav)
-//   content/<slug>/cover.*   -> optional picture shown on the page (jpg, png, webp)
+//   content/<N>-<name>/      -> book page N; the name is for humans only
+//   content/<N>-<name>/page.md   -> "# Title" on the first line, optional blurb, optional "emoji: 🐘"
+//   content/<N>-<name>/NN.md     -> one fact per file (01.md, 02.md, ...)
+//   content/<N>-<name>/NN.mp3    -> optional audio for that fact (mp3, m4a, ogg, wav)
+//   content/<N>-<name>/cover.*   -> optional picture shown on the page (jpg, png, webp)
 //
-//   dist/p/<slug>            -> picks a random fact and jumps to it  (this is the URL on the NFC tag)
-//   dist/p/<slug>/<n>        -> one fact, with its audio
+//   dist/p/<N>               -> picks a random fact and jumps to it  (this is the URL on the NFC tag)
+//   dist/p/<N>/<n>           -> one fact, with its audio
 //   dist/tags.json, tags.txt -> slug -> URL list for writing the tags
 //
 // No dependencies. Run with `node build.mjs`. Set SITE_URL to get absolute URLs
@@ -36,8 +37,15 @@ function md(text) {
 }
 
 // ---------- read content ----------
-function readPage(slug) {
-  const dir = join(CONTENT, slug);
+// Folder "3-ocean" -> page 3 (URL /p/3). The number is what the tag holds; the
+// name after the dash is just for humans and can change along with the content.
+function slugOf(folder) {
+  const m = /^(\d+)/.exec(folder);
+  return m ? String(parseInt(m[1], 10)) : folder;
+}
+function readPage(folder) {
+  const slug = slugOf(folder);
+  const dir = join(CONTENT, folder);
   const files = readdirSync(dir).sort();
   let title = slug, blurb = "", emoji = "";
   if (files.includes("page.md")) {
@@ -57,11 +65,16 @@ function readPage(slug) {
       const audio = files.find((a) => a.startsWith(stem + ".") && AUDIO_EXT.includes(extname(a).toLowerCase()));
       return { n, html: md(readFileSync(join(dir, f), "utf8")), audio };
     });
-  return { slug, title, blurb, emoji, cover, facts };
+  return { slug, folder, title, blurb, emoji, cover, facts };
 }
 
-const slugs = readdirSync(CONTENT).filter((d) => !d.startsWith("_") && !d.startsWith(".") && statSync(join(CONTENT, d)).isDirectory()).sort();
-const pages = slugs.map(readPage).filter((p) => p.facts.length > 0);
+const folders = readdirSync(CONTENT).filter((d) => !d.startsWith("_") && !d.startsWith(".") && statSync(join(CONTENT, d)).isDirectory());
+const pages = folders.map(readPage).filter((p) => p.facts.length > 0)
+  .sort((a, b) => (Number(a.slug) || 1e9) - (Number(b.slug) || 1e9) || a.slug.localeCompare(b.slug));
+{
+  const seen = new Set();
+  for (const p of pages) { if (seen.has(p.slug)) throw new Error(`two content folders map to page ${p.slug}`); seen.add(p.slug); }
+}
 
 // ---------- templates ----------
 const CSS = `
@@ -176,7 +189,7 @@ ${audio}`,
 }
 
 function indexPage() {
-  const items = pages.map((p) => `<li><span class="em" aria-hidden="true">${p.emoji || "📖"}</span><div><a href="/p/${p.slug}">${esc(p.title)}</a><small>${p.facts.length} fact${p.facts.length === 1 ? "" : "s"}${p.facts.filter((f) => f.audio).length ? `, ${p.facts.filter((f) => f.audio).length} with audio` : ""} · tag URL: <code>/p/${p.slug}</code></small></div></li>`).join("\n");
+  const items = pages.map((p) => `<li><span class="em" aria-hidden="true">${p.emoji || "📖"}</span><div><a href="/p/${p.slug}">Page ${esc(p.slug)} · ${esc(p.title)}</a><small>${p.facts.length} fact${p.facts.length === 1 ? "" : "s"}${p.facts.filter((f) => f.audio).length ? `, ${p.facts.filter((f) => f.audio).length} with audio` : ""} · tag URL: <code>/p/${p.slug}</code></small></div></li>`).join("\n");
   return shell({
     title: "Pumpkin's book of wonders",
     body: `<p class="eyebrow">Index</p><h1 class="display">Pumpkin's book of wonders</h1>
@@ -198,12 +211,12 @@ for (const p of pages) {
     out(`p/${p.slug}/${f.n}/index.html`, factPage(p, f));
     if (f.audio) {
       mkdirSync(join(DIST, "audio", p.slug), { recursive: true });
-      copyFileSync(join(CONTENT, p.slug, f.audio), join(DIST, "audio", p.slug, f.audio));
+      copyFileSync(join(CONTENT, p.folder, f.audio), join(DIST, "audio", p.slug, f.audio));
     }
   }
   if (p.cover) {
     mkdirSync(join(DIST, "img", p.slug), { recursive: true });
-    copyFileSync(join(CONTENT, p.slug, p.cover), join(DIST, "img", p.slug, p.cover));
+    copyFileSync(join(CONTENT, p.folder, p.cover), join(DIST, "img", p.slug, p.cover));
   }
   tags[p.slug] = { title: p.title, url: `${SITE_URL}/p/${p.slug}`, facts: p.facts.length, audio: p.facts.filter((f) => f.audio).length };
 }
@@ -212,6 +225,6 @@ out("tags.txt", pages.map((p) => `${p.slug}\t${SITE_URL}/p/${p.slug}\t${p.title}
 
 for (const p of pages) {
   const missing = p.facts.filter((f) => !f.audio).length;
-  console.log(`${p.slug.padEnd(16)} ${String(p.facts.length).padStart(2)} facts${missing ? `  (${missing} without audio)` : ""}`);
+  console.log(`${(p.slug + "  " + p.folder).padEnd(20)} ${String(p.facts.length).padStart(2)} facts${missing ? `  (${missing} without audio)` : ""}`);
 }
 console.log(`\nbuilt ${pages.length} pages -> ${DIST}/  (tag URLs in ${DIST}/tags.txt${SITE_URL ? "" : "; set SITE_URL for absolute URLs"})`);

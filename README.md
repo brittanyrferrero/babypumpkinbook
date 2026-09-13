@@ -10,18 +10,20 @@ about a minute.
 
 | URL | What it does |
 |---|---|
-| `/p/elephant` | **This is what goes on the tag.** Picks a random elephant fact and jumps to it. Won't repeat the last fact shown on that phone. |
-| `/p/elephant/2` | One specific fact, with its audio. |
+| `/p/3` | **This is what goes on the tag.** Page 3 of the book. Picks a random fact for that page and jumps to it. Won't repeat the last fact shown on that phone. |
+| `/p/3/2` | One specific fact, with its audio. |
 | `/` | A plain list of all pages, for us, not for the reader. |
 
 ## Adding or editing content (no coding needed)
 
-Everything lives in the `content/` folder. One folder per book page:
+Everything lives in the `content/` folder. One folder per book page, named
+`<page number>-<anything>`. The number is what the tag in the book points at;
+the name after the dash is just for us:
 
 ```
 content/
-  elephant/
-    page.md      the page title (first line, starting with "# ") and an optional one-line blurb
+  3-ocean/
+    page.md      "# Title" on the first line, an optional one-line blurb, and an optional "emoji: 🌊" line
     01.md        one fact per file, numbered. Plain text; **bold** and *italic* work.
     01.mp3       the audio for fact 01 (optional; mp3, m4a, ogg or wav all fine)
     02.md
@@ -31,8 +33,8 @@ content/
 
 - **New fact:** add `05.md` next to the others. That's it.
 - **Audio:** name the recording the same number as the fact, e.g. `03.m4a` goes with `03.md`. A fact with no audio just shows the text.
-- **New page:** make a new folder, add `page.md` and at least one fact file. The tag URL is `/p/<folder name>`. Use lowercase letters and dashes for the folder name, since it ends up in the URL.
-- **Renaming a folder changes its URL**, and the tags in the book are permanent. Once a tag is written, leave that folder name alone.
+- **New page:** make a folder `7-whatever`, add `page.md` and at least one fact file. Its tag URL is `/p/7`.
+- **Changing what a page is about:** rename the folder (keep the number), swap the facts and audio. The tag in the book keeps working because it only knows the number. Never give two folders the same number.
 
 Edit right on GitHub (open a file, click the pencil, commit) or clone the repo.
 Vercel rebuilds automatically on every commit to `main`.
@@ -53,5 +55,5 @@ absolute URLs: `SITE_URL=https://babypumpkinbook.vercel.app npm run build`.
 
 The tags are NTAG stickers written with an NDEF URL record. Any NFC phone app
 (NFC Tools works) can write them, or the RC522 writer board in
-`rfid-thread-scanner/tools/ntag-writer`. Write the `/p/<page>` URL, never a
+`rfid-thread-scanner/tools/ntag-writer`. Write the `/p/<number>` URL, never a
 specific fact URL, so each scan gets a fresh fact.
