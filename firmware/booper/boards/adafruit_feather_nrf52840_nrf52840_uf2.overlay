@@ -1,0 +1,76 @@
+/*
+ * Elecrow Pro Micro nRF52840 scanner board, NTAG-writer subset of the main
+ * scanner overlay (boards/ in the repo root):
+ *   RC522:   SCK->P0.17  MOSI->P0.22  MISO->P0.20  CS->P0.09  RST->P0.08
+ *   NFC-EN:  P0.29 (P-channel MOSFET, drive LOW = ON)
+ * Console is USB CDC-ACM.
+ */
+#include <zephyr/dt-bindings/pinctrl/nrf-pinctrl.h>
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	chosen {
+		zephyr,console    = &cdc_acm_uart0;
+		zephyr,shell-uart = &cdc_acm_uart0;
+	};
+
+	zephyr,user {
+		rst-gpios    = <&gpio0  8 GPIO_ACTIVE_HIGH>;
+		nfc-en-gpios = <&gpio0 29 GPIO_ACTIVE_LOW>;
+	};
+};
+
+&zephyr_udc0 {
+	cdc_acm_uart0: cdc_acm_uart0 {
+		compatible = "zephyr,cdc-acm-uart";
+	};
+};
+
+&qspi {
+	status = "disabled";
+};
+
+&pinctrl {
+	spi3_default: spi3_default {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK,  0, 17)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 22)>,
+				<NRF_PSEL(SPIM_MISO, 0, 20)>;
+		};
+	};
+	spi3_sleep: spi3_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK,  0, 17)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 22)>,
+				<NRF_PSEL(SPIM_MISO, 0, 20)>;
+			low-power-enable;
+		};
+	};
+};
+
+&spi3 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	pinctrl-0 = <&spi3_default>;
+	pinctrl-1 = <&spi3_sleep>;
+	pinctrl-names = "default", "sleep";
+	cs-gpios = <&gpio0 9 GPIO_ACTIVE_LOW>;
+};
+
+/* P0.09 is the RC522 CS; free the NFCT pins for GPIO (writes UICR once). */
+&uicr {
+	nfct-pins-as-gpios;
+};
+
+/* The Feather board dts enables spi1 with the legacy nrfx_spi driver, which
+ * conflicts with USB CDC on this board (see the main overlay). Not used here. */
+&spi1 {
+	status = "disabled";
+};
+
+/* The board dts also adds a CDC-ACM port of its own (board_cdc_acm_uart),
+ * which enumerates ahead of ours as ttyACM0. Drop it so there is one port.
+ * (Takes effect on the next build/flash; v2 still has both.) */
+&board_cdc_acm_uart {
+	status = "disabled";
+};

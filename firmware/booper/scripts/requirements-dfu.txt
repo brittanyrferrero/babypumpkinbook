@@ -1,0 +1,8 @@
+pyserial>=3.5
+pycryptodome>=3.15
+# LabJack U3 driver for the automated double-tap (provides the `u3` module;
+# runtime device access also needs the Exodriver system library). Without it
+# the flash scripts fall back to a manual double-tap prompt.
+LabJackPython>=2.1
+# nrfutil is no longer needed: the CRC16/SLIP helpers it provided are vendored
+# in scripts/dfu_common.py (the deprecated pc-nrfutil pin fought Python 3.11+).

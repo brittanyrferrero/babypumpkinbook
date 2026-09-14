@@ -1,0 +1,19 @@
+# Mirror of partitions defined in nrf52840_partition_uf2_sdv6.dtsi
+# Default flash layout for nrf52840 using UF2 and SoftDevice s140 v6
+# softdevice_reserved must come first to push app to 0x26000
+
+softdevice_reserved:
+  address: 0x00000
+  size: 0x26000
+
+app:
+  address: 0x26000
+  size: 0xC6000
+
+settings_storage:
+  address: 0xEC000
+  size: 0x8000
+
+uf2_partition:
+  address: 0xF4000
+  size: 0xC000

@@ -8,6 +8,8 @@ audio. Static site, deployed by Vercel from `main`.
 - `TAG-WRITER.md` — how to write stickers with the USB "booper" board using
   `tools/ntag_write.py`. Read this when asked about tags, stickers, NFC, or
   the booper.
+- `firmware/booper/` — the tag-writer board's Zephyr firmware, built image,
+  and DFU flasher. Only needed if the board is wiped.
 - `content/<N>-<name>/` — the book pages. The number is the tag URL (`/p/N`)
   and must never change once a sticker is written; the name is cosmetic.
 - `build.mjs` — the whole build, no dependencies. `npm run build` → `dist/`.

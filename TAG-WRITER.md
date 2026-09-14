@@ -104,9 +104,7 @@ s        status
 ?        help
 ```
 
-## Reflashing (Eamon)
+## Reflashing
 
-The firmware and DFU flow live in the `rfid-thread-scanner` repo under
-`tools/ntag-writer/`. It's the same nice!nano bootloader double-tap dance as
-the scanners; `ntag_writer_v2.zip` is the built image. Not something the
-booper should ever need in normal use.
+Only if the board is ever wiped. The firmware, the exact image the booper
+runs, and the flasher are all in [`firmware/booper/`](firmware/booper/README.md).
