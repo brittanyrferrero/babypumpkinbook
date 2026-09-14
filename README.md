@@ -110,7 +110,11 @@ absolute URLs: `SITE_URL=https://babypumpkinbook.vercel.app npm run build`.
 
 ## Writing the tags
 
-The tags are NTAG stickers written with an NDEF URL record. Any NFC phone app
-(NFC Tools works) can write them, or the RC522 writer board in
-`rfid-thread-scanner/tools/ntag-writer`. Write the `/p/<number>` URL, never a
-specific fact URL, so each scan gets a fresh fact.
+See [TAG-WRITER.md](TAG-WRITER.md). Short version: plug in the booper, then
+
+```
+uv run tools/ntag_write.py --url https://babypumpkinbook-algb.vercel.app/p/3
+```
+
+and tap an NTAG213/215 sticker. Always the `/p/<number>` URL, never a specific
+fact URL, so each scan gets a fresh fact.
