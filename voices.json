@@ -31,6 +31,16 @@
       "speed": 1.0,
       "enabled": true,
       "note": "Prepped with prep_voice.py from a 9.7 s iMessage audio message, trimmed to 6.7 s of speech."
+    },
+    {
+      "name": "luke",
+      "person": "Luke",
+      "ref": "luke.wav",
+      "instruct": "male, moderate pitch, young adult",
+      "gain": 1.0,
+      "speed": 1.0,
+      "enabled": true,
+      "note": "Prepped with prep_voice.py from a 10.7 s voice memo, trimmed to 8.6 s of speech."
     }
   ]
 }
