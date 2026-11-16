@@ -1,7 +1,7 @@
 // Builds the static site from content/ into dist/.
 //
 //   content/<N>-<name>/      -> book page N; the name is for humans only
-//   content/<N>-<name>/page.md   -> "# Title" on the first line, optional blurb
+//   content/<N>-<name>/page.md   -> "# Title" on the first line
 //   content/<N>-<name>/NN.md     -> one fact per file (01.md, 02.md, ...)
 //   content/<N>-<name>/NN.mp3    -> optional audio for that fact (mp3, m4a, mp4, ogg, wav; mp4 plays as sound only)
 //   content/<N>-<name>/cover.*   -> optional picture shown on the page (jpg, png, webp)
@@ -174,7 +174,6 @@ function factPage(p, f) {
   return shell({
     title: `${p.title} · fact ${f.n}`,
     body: `<h1>${esc(p.title)}</h1>
-${p.blurb ? `<p class="blurb">${inline(p.blurb)}</p>` : ""}
 ${cover}
 <div class="fact">${f.html}</div>
 ${audio}`,

@@ -201,7 +201,7 @@ async function toJpeg(file) {
 
 // ---------------------------------------------------------------- helpers for changes
 const pagePath = (p, name) => `content/${p.folder}/${name}`;
-const pageMd = (title, blurb) => `# ${title.trim()}\n${blurb.trim() ? blurb.trim() + "\n" : ""}`;
+const pageMd = (title) => `# ${title.trim()}\n`;
 function recordingsChange(mutate) {
   const r = JSON.parse(JSON.stringify(DATA.recordings || {})); mutate(r);
   const sorted = Object.fromEntries(Object.keys(r).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map((k) => [k, r[k]]));
@@ -287,7 +287,6 @@ function renderPage(num) {
     <div class="card">
       <p class="label">Page details</p>
       <div class="field"><label class="f" for="ti">Name</label><input type="text" id="ti" value="${esc(p.title)}" maxlength="80"></div>
-      <div class="field"><label class="f" for="bl">One-line description</label><input type="text" id="bl" value="${esc(p.blurb)}" maxlength="200"></div>
       <div class="btns"><button class="btn" id="savep" disabled>Save page details</button></div>
     </div>
 
@@ -314,9 +313,9 @@ function renderPage(num) {
     </div>`;
 
   // --- page details
-  const ti = $("#ti"), bl = $("#bl"), savep = $("#savep");
-  const dirty = () => (savep.disabled = !ti.value.trim() || (ti.value === p.title && bl.value === p.blurb));
-  [ti, bl].forEach((i) => i.addEventListener("input", dirty));
+  const ti = $("#ti"), savep = $("#savep");
+  const dirty = () => (savep.disabled = !ti.value.trim() || ti.value === p.title);
+  ti.addEventListener("input", dirty);
   savep.addEventListener("click", () => busy(savep, async () => {
     const title = ti.value.trim();
     const changes = [];
@@ -326,7 +325,7 @@ function renderPage(num) {
       for (const f of p.files) changes.push({ path: `content/${want}/${f.name}`, sha: f.sha }, { path: pagePath(p, f.name), delete: true });
       target = { ...p, folder: want };
     }
-    changes.push({ path: pagePath(target, "page.md"), content: b64text(pageMd(title, bl.value)) });
+    changes.push({ path: pagePath(target, "page.md"), content: b64text(pageMd(title)) });
     await save(`Page ${p.number}: ${title}`, changes);
     toast("Saved. Live in about a minute.");
   }));
@@ -440,7 +439,6 @@ function renderNew() {
     <p class="sub">Its sticker address will be <code>${esc(location.origin)}/p/${n}</code>. You can add more facts and recordings after.</p>
     <div class="card">
       <div class="field"><label class="f" for="ti">Name</label><input type="text" id="ti" maxlength="80" placeholder="Octopuses"></div>
-      <div class="field"><label class="f" for="bl">One-line description</label><input type="text" id="bl" maxlength="200" placeholder="Eight arms and three hearts."></div>
       <div class="field"><label class="f" for="ff">First fact</label><textarea id="ff"></textarea></div>
       <div class="btns"><button class="btn" id="create" disabled>Create page ${n}</button></div>
     </div>`;
@@ -450,7 +448,7 @@ function renderNew() {
   create.addEventListener("click", () => busy(create, async () => {
     const folder = `${n}-${slugify(ti.value)}`;
     await save(`Page ${n}: ${ti.value.trim()}`, [
-      { path: `content/${folder}/page.md`, content: b64text(pageMd(ti.value, $("#bl").value)) },
+      { path: `content/${folder}/page.md`, content: b64text(pageMd(ti.value)) },
       { path: `content/${folder}/01.md`, content: b64text(ff.value.trim() + "\n") },
     ]);
     location.hash = `#/page/${n}`;

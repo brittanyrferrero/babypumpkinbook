@@ -1,2 +1,1 @@
 # Oak and squirrel
-emoji: 🌋
