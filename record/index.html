@@ -73,7 +73,7 @@ audio{width:100%;margin:.25rem 0 1rem}
 <body>
 <header>
   <span class="brand">Pumpkin's book · <em>record</em></span>
-  <div class="hright"><span id="who"></span><button class="linkbtn" id="logout" hidden>Log out</button></div>
+  <div class="hright"><span id="who"></span></div>
 </header>
 <main id="app"><p class="empty">Loading…</p></main>
 <div class="toast" id="toast" hidden></div>
@@ -109,7 +109,6 @@ function b64(bytes) {
 async function api(path, opts = {}) {
   const res = await fetch(path, { ...opts, headers: { "x-pb": "1", ...(opts.body ? { "content-type": "application/json" } : {}) }, credentials: "same-origin" });
   const data = await res.json().catch(() => ({}));
-  if (res.status === 401 && path !== "/api/login") { DATA = null; renderLogin(); throw new Error("Please log in again."); }
   if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
   return data;
 }
@@ -133,31 +132,9 @@ async function load() {
     const f = DATA.pages.find((p) => p.number === Number(n))?.facts.find((x) => x.stem === stem);
     if (f && !f.recording) f.recording = { by };
   }
-  $("#logout").hidden = false;
 }
 
 // ---------------------------------------------------------------- views
-function renderLogin(err = "") {
-  $("#logout").hidden = true; $("#who").textContent = "";
-  $("#app").innerHTML = `<form class="login card" id="lf">
-    <p class="label">Pumpkin's book of wonders</p>
-    <h1>Read to <em>Pumpkin</em></h1>
-    <p class="sub" style="margin-bottom:1.1rem">Record facts in your own voice. They'll play when Pumpkin taps a sticker in the book.</p>
-    <div class="field"><label class="f" for="nm">Your name</label><input id="nm" autocomplete="name" maxlength="40" placeholder="e.g. Grandma" required value="${esc(getName())}"></div>
-    <div class="field"><label class="f" for="pw">Family password</label><input type="password" id="pw" autocomplete="current-password" required></div>
-    <div class="btns"><button class="btn" type="submit">Start</button></div>
-    ${err ? `<p class="err">${esc(err)}</p>` : ""}
-  </form>`;
-  $(getName() ? "#pw" : "#nm").focus();
-  $("#lf").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const btn = $("#lf button"); btn.disabled = true; btn.textContent = "Checking…";
-    setName($("#nm").value.replace(/\s+/g, " ").trim());
-    try { await api("/api/login", { method: "POST", body: JSON.stringify({ password: $("#pw").value }) }); await load(); route(); }
-    catch (e) { renderLogin(e.message); }
-  });
-}
-
 function renderWho() {
   const n = getName();
   $("#who").innerHTML = n ? `Recording as <b>${esc(n)}</b> · <button class="linkbtn" id="rename">change</button>` : "";
@@ -165,8 +142,9 @@ function renderWho() {
 }
 function askName() {
   $("#app").innerHTML = `<form class="login card" id="nf">
-    <h1>Who's <em>reading?</em></h1>
-    <p class="sub" style="margin-bottom:1.1rem">Your name goes with each recording you make.</p>
+    <p class="label">Pumpkin's book of wonders</p>
+    <h1>Read to <em>Pumpkin</em></h1>
+    <p class="sub" style="margin-bottom:1.1rem">Record facts in your own voice. They'll play when Pumpkin taps a sticker in the book. What's your name?</p>
     <div class="field"><input id="nm" autocomplete="name" maxlength="40" placeholder="e.g. Grandma" required value="${esc(getName())}"></div>
     <div class="btns"><button class="btn" type="submit">Continue</button></div></form>`;
   $("#nm").focus();
@@ -284,11 +262,10 @@ function route() {
 }
 window.addEventListener("hashchange", () => { if (take && !/^#\/fact\//.test(location.hash)) clearTake(); route(); });
 window.addEventListener("beforeunload", (e) => { if (take || rec) { e.preventDefault(); e.returnValue = ""; } });
-$("#logout").addEventListener("click", async () => { stopMic(); clearTake(); await fetch("/api/login", { method: "DELETE" }); DATA = null; renderLogin(); });
 
 (async () => {
   try { await load(); route(); }
-  catch (e) { if (DATA === null && !/log in/i.test(e.message)) renderLogin(e.message); }
+  catch (e) { $("#app").innerHTML = `<p class="empty">${esc(e.message)} Try reloading the page.</p>`; }
 })();
 </script>
 </body>

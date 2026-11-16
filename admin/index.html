@@ -132,7 +132,7 @@ async function api(path, opts = {}) {
 }
 async function load() {
   DATA = await api("/api/content");
-  if (DATA.role !== "admin") { location.replace("/record"); throw new Error("Taking you to the recording page…"); } // family password
+  if (DATA.role !== "admin") { DATA = null; renderLogin(); throw new Error("Please log in."); } // /api/content is open to /record, so check the role
   $("#logout").hidden = false;
 }
 async function save(message, changes) {
@@ -274,7 +274,7 @@ function renderHome() {
     const grid = document.createElement("div"); grid.className = "fgrid"; body.appendChild(grid);
     factsInto(grid, p);
     const more = document.createElement("a");
-    more.className = "more"; more.href = `#/page/${p.number}`; more.textContent = "Picture and sticker address ›";
+    more.className = "more"; more.href = `#/page/${p.number}`; more.textContent = "Picture, sticker address, or replace this page ›";
     body.appendChild(more);
     body.querySelectorAll("textarea").forEach(grow); // size each box to its fact now that it's visible
   };
@@ -313,7 +313,18 @@ function renderPage(num) {
     </div>
 
     <p class="label" style="margin-top:2rem">Facts</p>
-    <div id="facts" class="fgrid"></div>`;
+    <div id="facts" class="fgrid"></div>
+
+    <div class="card" style="margin-top:2.5rem;border-top:1px solid var(--border)">
+      <p class="label">Use page ${p.number} for something new</p>
+      <p class="hint" style="margin:0 0 .9rem">The sticker stays the same, but the name, every fact, every recording and the picture are replaced.</p>
+      <div class="btns"><button class="btn danger" id="reuse" style="border-color:var(--danger)">Replace this page…</button></div>
+      <div id="reuseform" hidden>
+        <div class="field"><label class="f" for="rti">New name</label><input type="text" id="rti" maxlength="80" placeholder="e.g. Hummingbirds"></div>
+        <div class="field"><label class="f" for="rff">First fact</label><textarea id="rff" placeholder="You can add more facts after."></textarea></div>
+        <div class="btns"><button class="btn danger" id="rgo" disabled style="background:var(--danger);color:var(--bg);border-color:var(--danger)">Replace page ${p.number}</button><button class="btn quiet" id="rcancel">Cancel</button></div>
+      </div>
+    </div>`;
 
   // --- page details
   const ti = $("#ti"), savep = $("#savep");
@@ -341,6 +352,33 @@ function renderPage(num) {
 
   // --- facts
   factsInto($("#facts"), p);
+
+  // --- replace the whole page, keeping its number (the sticker can't change)
+  const rti = $("#rti"), rff = $("#rff"), rgo = $("#rgo");
+  $("#reuse").addEventListener("click", () => { $("#reuseform").hidden = false; $("#reuse").parentElement.hidden = true; rti.focus(); });
+  $("#rcancel").addEventListener("click", () => { $("#reuseform").hidden = true; $("#reuse").parentElement.hidden = false; });
+  const rok = () => (rgo.disabled = !rti.value.trim() || !rff.value.trim());
+  rti.addEventListener("input", rok); rff.addEventListener("input", rok);
+  rgo.addEventListener("click", () => {
+    const recs = p.facts.filter((f) => f.recording).length;
+    if (!confirm(`Replace page ${p.number} "${p.title}" with "${rti.value.trim()}"?\n\nIts ${p.facts.length} fact${p.facts.length === 1 ? "" : "s"}${recs ? `, ${recs} family recording${recs === 1 ? "" : "s"}` : ""}${p.cover ? ", picture" : ""} and AI audio will be deleted. The sticker keeps working and shows the new page.`)) return;
+    busy(rgo, async () => {
+      const title = rti.value.trim();
+      const folder = `${p.number}-${slugify(title)}`;
+      const changes = p.files.map((f) => ({ path: pagePath(p, f.name), delete: true }));
+      changes.push(
+        { path: `content/${folder}/page.md`, content: b64text(pageMd(title)) },
+        { path: `content/${folder}/01.md`, content: b64text(rff.value.trim() + "\n") },
+      );
+      if (Object.keys(DATA.recordings || {}).some((k) => k.startsWith(`${p.number}/`)))
+        changes.push(recordingsChange((r) => { for (const k of Object.keys(r)) if (k.startsWith(`${p.number}/`)) delete r[k]; }));
+      // a path that's both deleted and written (same folder name) must only be written
+      const written = new Set(changes.filter((c) => !c.delete).map((c) => c.path));
+      await save(`Page ${p.number}: replaced with ${title}`, changes.filter((c) => !(c.delete && written.has(c.path))));
+      toast(`Page ${p.number} is now ${title}. Live in about a minute.`);
+      window.scrollTo(0, 0);
+    });
+  });
 }
 
 // Saves a page's new name. The folder name follows the name; the number never changes.

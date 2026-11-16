@@ -1,13 +1,13 @@
 import { requireAuth, gh, commit, json, fail } from "./_lib.js";
 
 // POST { page, stem, by, audio (base64 mp3) } → one commit that adds a
-// person's recording to a fact. This is the only write the family password
-// can make: it can't change any text, and it can't replace a recording that
-// a person already made (only an AI clip, which a person's recording beats).
+// person's recording to a fact. Open to anyone (the /record page has no
+// password), so it can't change any text, and it can't replace a recording
+// that a person already made (only an AI clip, which a person's recording beats).
 const AUDIO = /^(\d{2,3})\.(mp3|m4a|mp4|ogg|wav)$/;
 
 export async function POST(req) {
-  const denied = requireAuth(req, ["admin", "recorder"]);
+  const denied = requireAuth(req, ["admin", "anyone"]);
   if (denied) return denied;
   let body;
   try { body = await req.json(); } catch { return fail(400, "Bad request."); }

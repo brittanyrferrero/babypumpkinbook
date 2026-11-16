@@ -3,7 +3,7 @@ import { requireAuth, sessionRole, gh, json, fail, BRANCH } from "./_lib.js";
 // GET → every book page with its facts, straight from the repo (not the
 // deployed site), so the dashboard always shows the latest saved state.
 export async function GET(req) {
-  const denied = requireAuth(req, ["admin", "recorder"]);
+  const denied = requireAuth(req, ["admin", "anyone"]);
   if (denied) return denied;
   try {
     const ref = await gh(`/git/ref/heads/${BRANCH}`);

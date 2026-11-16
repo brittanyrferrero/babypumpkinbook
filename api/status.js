@@ -3,7 +3,7 @@ import { requireAuth, gh, json, fail } from "./_lib.js";
 // GET ?sha=<commit> → "pending" | "success" | "failure", from the status
 // Vercel posts on each commit, so the dashboard can say when a save is live.
 export async function GET(req) {
-  const denied = requireAuth(req, ["admin", "recorder"]);
+  const denied = requireAuth(req);
   if (denied) return denied;
   const sha = new URL(req.url).searchParams.get("sha") || "";
   if (!/^[0-9a-f]{40}$/.test(sha)) return fail(400, "Bad sha.");

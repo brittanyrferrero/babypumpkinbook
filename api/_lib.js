@@ -5,7 +5,6 @@
 // push. Env vars (set in Vercel → Project → Settings → Environment Variables):
 //
 //   ADMIN_PASSWORD   the full dashboard password; also signs the login cookie
-//   RECORDER_PASSWORD optional, the family password for /record (recordings only)
 //   GITHUB_TOKEN     fine-grained token, this repo only, Contents: read & write
 //   GITHUB_REPO      optional, default brittanyrferrero/babypumpkinbook
 //   GITHUB_BRANCH    optional, default main
@@ -23,10 +22,9 @@ export const json = (data, status = 200, headers = {}) =>
 export const fail = (status, error) => json({ error }, status);
 
 // ---------- auth ----------
-// Two passwords, two roles. ADMIN_PASSWORD opens the full dashboard (/admin).
-// RECORDER_PASSWORD is the family password: it only opens /record, which can
-// add a recording to a fact that doesn't have a person's recording yet.
-// The role is inside the signed cookie, so it can't be changed by the browser.
+// ADMIN_PASSWORD opens the full dashboard (/admin); the role is inside the
+// signed cookie. /record needs no password: its routes allow "anyone", and
+// api/record.js only lets them add a recording to a fact nobody has recorded.
 function sign(exp, role) {
   return createHmac("sha256", process.env.ADMIN_PASSWORD).update(`pb-session:${exp}:${role}`).digest("base64url");
 }
@@ -34,11 +32,10 @@ function safeEqual(a, b) {
   const x = Buffer.from(String(a)), y = Buffer.from(String(b));
   return x.length === y.length && timingSafeEqual(x, y);
 }
-// → "admin" | "recorder" | null
+// → "admin" | null
 export function checkPassword(pw) {
   if (!pw) return null;
   if (process.env.ADMIN_PASSWORD && safeEqual(pw, process.env.ADMIN_PASSWORD)) return "admin";
-  if (process.env.ADMIN_PASSWORD && process.env.RECORDER_PASSWORD && safeEqual(pw, process.env.RECORDER_PASSWORD)) return "recorder";
   return null;
 }
 export function sessionCookie(role) {
@@ -47,20 +44,22 @@ export function sessionCookie(role) {
 }
 export const clearCookie = () => `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
 
-// The logged-in role ("admin" | "recorder"), or null.
+// The logged-in role ("admin"), or null.
 export function sessionRole(req) {
-  const m = new RegExp(`(?:^|;\\s*)${COOKIE}=(\\d+)\\.(admin|recorder)\\.([\\w-]+)`).exec(req.headers.get("cookie") || "");
+  const m = new RegExp(`(?:^|;\\s*)${COOKIE}=(\\d+)\\.(admin)\\.([\\w-]+)`).exec(req.headers.get("cookie") || "");
   if (!m || Number(m[1]) < Date.now() || !safeEqual(m[3], sign(m[1], m[2]))) return null;
   return m[2];
 }
 
 // Returns an error Response if the request isn't allowed, else null.
-// roles: which roles may call this route (default: admin only).
+// roles: who may call this route: "admin" (logged in) and/or "anyone" (no login).
 export function requireAuth(req, roles = ["admin"]) {
   if (!process.env.ADMIN_PASSWORD || !process.env.GITHUB_TOKEN) return fail(503, "Dashboard isn't set up yet (missing ADMIN_PASSWORD or GITHUB_TOKEN).");
   const role = sessionRole(req);
-  if (!role) return fail(401, "Please log in.");
-  if (!roles.includes(role)) return fail(403, "That password can't do this.");
+  if (!roles.includes("anyone")) {
+    if (!role) return fail(401, "Please log in.");
+    if (!roles.includes(role)) return fail(403, "Not allowed.");
+  }
   // Writes must carry a custom header, which a cross-site form can't send.
   if (req.method !== "GET" && req.headers.get("x-pb") !== "1") return fail(403, "Bad request.");
   return null;

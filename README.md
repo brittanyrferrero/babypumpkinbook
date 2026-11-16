@@ -24,6 +24,12 @@ the sound is kept). Each save is a commit to this repo, so the site updates
 about a minute later, the same as any other push. The header shows
 "Publishing…" and then "Live".
 
+Stickers are permanent, so pages are never deleted or renumbered. To use a
+page number for a different topic, open the page's settings ("Picture, sticker
+address, or replace this page") and use **Replace this page**: it keeps the
+number and swaps in a new name and first fact, removing the old facts,
+recordings and picture in one save.
+
 Recordings uploaded there are converted in the browser to a mono mp3, trimmed
 and level-matched to the AI clips, and saved as `NN.mp3`. They're listed in
 `content/recordings.json` (key `<page number>/<NN>`, with who read it), which
@@ -32,21 +38,21 @@ don't delete mp3s that are listed there.**
 
 ### Family recording page
 
-`/record` is for family members. They log in with the family password
-(`RECORDER_PASSWORD`) and their name, see every fact that doesn't have a
+`/record` is for family members. There's no password: they type their name,
+see every fact that doesn't have a
 person's recording yet (AI-voiced facts count as not recorded), and pick one.
 They record with the phone or laptop mic, listen back, record again as often as
 they like, and then **Submit** it or **Delete** the take. Submitted recordings
 go live straight away (converted the same way as uploads) and are credited in
 `recordings.json`. Facts that already have a person's recording are listed at
-the bottom, read-only. The family password can't use `/admin`: the server only
-lets it add a recording to a fact with no person's recording (`api/record.js`).
+the bottom, read-only. Anyone with the link can use it, so the server only lets it add a recording to
+a fact with no person's recording (`api/record.js`); it can't change text or
+replace anyone's recording.
 You can still replace or remove any recording from `/admin`.
 
 Setup (already done once; only needed for a new Vercel project): the
 dashboard needs these environment variables in Vercel: `ADMIN_PASSWORD` (the
-admin password), `RECORDER_PASSWORD` (the family password for `/record`; leave
-it unset to turn that page off) and `GITHUB_TOKEN` (a fine-grained GitHub token
+admin password) and `GITHUB_TOKEN` (a fine-grained GitHub token
 for this repo only, with Contents: read and write, and Commit statuses: read).
 The code is `admin/index.html`, `record/index.html`, `admin/audio.js` (shared
 mp3 conversion) and `api/`.

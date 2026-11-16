@@ -1,7 +1,7 @@
 import { checkPassword, sessionCookie, clearCookie, json, fail } from "./_lib.js";
 
 // POST {password} → sets the session cookie, returns {role}.  DELETE → logs out.
-// The admin password logs in as "admin", the family password as "recorder".
+// Only the admin password logs in; /record needs no login.
 export async function POST(req) {
   if (!process.env.ADMIN_PASSWORD) return fail(503, "Dashboard isn't set up yet (no ADMIN_PASSWORD).");
   let password = "";
