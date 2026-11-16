@@ -6,14 +6,14 @@
 <meta name="robots" content="noindex">
 <title>Book dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <style>
-:root{--bg:#1c1c1f;--surface:#242428;--raised:#2a2a2f;--border:#323238;--border-strong:#44444b;--hover:rgba(255,255,255,.035);--accent:#9fcdb4;--accent-ink:#1c1c1f;--accent-light:rgba(159,205,180,.12);--accent-mid:#5f8a74;--text:#ededef;--ink-soft:#c9c9ce;--muted:#9a9aa2;--faint:#64646c;--danger:#ff7a66;--danger-light:rgba(255,122,102,.12);--shadow-sm:none;--shadow-md:none;--serif:"Fraunces",Georgia,serif;--body:"Figtree",system-ui,-apple-system,sans-serif;color-scheme:dark}
+:root{--bg:#1c1c1f;--surface:#242428;--raised:#2a2a2f;--border:#323238;--border-strong:#44444b;--hover:rgba(255,255,255,.035);--accent:#9fcdb4;--accent-ink:#1c1c1f;--accent-light:rgba(159,205,180,.12);--accent-mid:#5f8a74;--text:#ededef;--ink-soft:#c9c9ce;--muted:#9a9aa2;--faint:#64646c;--danger:#ff7a66;--danger-light:rgba(255,122,102,.12);--shadow-sm:none;--shadow-md:none;--serif:"Figtree",system-ui,-apple-system,sans-serif;--body:"Figtree",system-ui,-apple-system,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 var(--body);min-height:100svh;-webkit-font-smoothing:antialiased}
 a{color:var(--accent)}
-header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:1rem;justify-content:space-between;padding:.9rem 1.25rem;background:var(--bg);border-bottom:1px solid var(--border)}
+header{position:sticky;top:0;z-index:5;height:3.4rem;display:flex;align-items:center;gap:1rem;justify-content:space-between;padding:0 1.25rem;background:var(--bg);border-bottom:1px solid var(--border)}
 .brand{font-family:var(--serif);font-weight:400;font-size:1.15rem;letter-spacing:-.01em;color:var(--text);text-decoration:none}
 .brand em{color:var(--accent)}
 .hright{display:flex;align-items:center;gap:1rem;font-size:.85rem;color:var(--muted)}
@@ -56,10 +56,19 @@ button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var
 .pill.bad{color:var(--danger);border-color:var(--danger)}
 .dot{width:.5rem;height:.5rem;border-radius:50%;background:currentColor}
 .pill.busy .dot{animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.25}}
-main{max-width:44rem;margin:0 auto;padding:2.5rem 1.25rem 5rem}
-textarea{resize:vertical;min-height:5.5rem;line-height:1.5}
-.fact{padding:1.1rem 0 1.2rem;border-bottom:1px solid var(--border)}
-.fhead{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin:0 0 .55rem}
+main{max-width:64rem;margin:0 auto;padding:2rem 1.25rem 5rem}
+textarea{resize:vertical;min-height:3.2rem;line-height:1.5}
+/* facts are tiles in a grid: two or three across on a wide screen, one on a phone */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:.75rem;align-items:start}
+.fact{display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:.8rem .85rem .75rem}
+.fact textarea{font-size:.92rem;padding:.5rem .6rem}
+.fact .btns{gap:.35rem;margin-top:.6rem!important}
+.fact .btn{padding:.32rem .75rem;font-size:.8rem}
+.fact audio{height:2.1rem;margin:.55rem 0 0}
+.fact .hint{font-size:.75rem}
+.fact.newf{border-style:dashed;background:transparent}
+.fhead{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin:0 0 .45rem}
+.fhead .label{color:var(--muted);font-weight:500}
 .badge{font-size:.75rem;padding:.12rem .55rem;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
 .badge.rec{color:var(--accent);border-color:var(--accent-mid)}
 audio{width:100%;height:2.4rem;margin:.7rem 0 .2rem}
@@ -68,14 +77,25 @@ audio{width:100%;height:2.4rem;margin:.7rem 0 .2rem}
 .cover{display:block;max-width:100%;max-height:14rem;border-radius:10px;margin:0 0 .75rem}
 .url{display:flex;gap:.5rem;align-items:center;font-size:.85rem}
 .url code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--surface);border-radius:8px;padding:.45rem .6rem}
-details.pg>summary{list-style:none;cursor:pointer}
+details.pg>summary{list-style:none;cursor:pointer;grid-template-columns:auto 1fr auto;padding:.75rem .5rem}
+details.pg h2{font-size:1.1rem;font-weight:500}
+.num{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:.85rem;font-weight:600;font-variant-numeric:tabular-nums}
+/* an open page is one outlined block, so it's clear where it starts and ends */
+details.pg[open]{background:var(--surface);border:1px solid var(--border-strong);border-radius:14px;margin:.85rem 0}
+details.pg[open]>summary{position:sticky;top:3.4rem;z-index:3;background:var(--surface);border-radius:14px 14px 0 0;border-bottom:1px solid var(--border)}
+details.pg[open]>summary:hover{background:var(--raised)}
+details.pg[open] .num{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 details.pg>summary::-webkit-details-marker{display:none}
 details.pg[open]>summary .chev{transform:rotate(90deg)}
-.pgbody{padding:0 0 1rem 1.5rem;border-bottom:1px solid var(--border)}
+.pgbody{padding:.85rem .85rem 1rem}
 .pgbody .more{display:inline-block;color:var(--muted);font-size:.85rem;text-decoration:underline;text-decoration-color:var(--border-strong);text-underline-offset:4px;margin:1rem 0 0}
 .pgbody .more:hover{color:var(--text)}
+.pgname{max-width:30rem;margin:0 0 .85rem}
+.pgname label.f{display:none}
+.inline{display:flex;gap:.5rem;align-items:center}
+.inline input{flex:1;min-width:0}
 input[type=file]{display:none}
-@media(max-width:520px){header{padding:.75rem 1rem}.hide-sm{display:none}.pgbody{padding-left:.5rem}}
+@media(max-width:520px){header{padding:0 1rem}.hide-sm{display:none}.pgbody{padding:.6rem .5rem .8rem}}
 </style>
 </head>
 <body>
@@ -228,7 +248,8 @@ function renderHome() {
   const rows = pages.map((p) => {
     const rec = p.facts.filter((f) => f.recording).length, au = p.facts.filter((f) => f.audio).length;
     return `<details class="pg" data-n="${p.number}"${OPEN.has(p.number) ? " open" : ""}><summary class="row">
-      <span><span class="label" style="margin:0">Page ${p.number}</span><h2>${esc(p.title || "Untitled")}</h2>
+      <span class="num" title="Page ${p.number}">${p.number}</span>
+      <span><h2>${esc(p.title || "Untitled")}</h2>
       <span class="meta">${p.facts.length} fact${p.facts.length === 1 ? "" : "s"} · ${rec ? `${rec} recorded by people, ` : ""}${au - rec} AI voice${au - rec === 1 ? "" : "s"}${p.facts.length - au ? `, ${p.facts.length - au} without sound` : ""}</span></span>
       <span class="chev">›</span></summary><div class="pgbody"></div></details>`;
   }).join("");
@@ -242,10 +263,20 @@ function renderHome() {
     const body = $(".pgbody", d);
     if (body.childElementCount) return;
     const p = pages.find((x) => x.number === Number(d.dataset.n));
-    factsInto(body, p);
+    const name = document.createElement("div");
+    name.className = "pgname";
+    name.innerHTML = `<label class="f">Page name</label><div class="inline"><input type="text" maxlength="80" aria-label="Page name" placeholder="Page name" value="${esc(p.title)}"><button class="btn" disabled>Save</button></div>`;
+    body.appendChild(name);
+    const ti = $("input", name), sv = $("button", name);
+    ti.addEventListener("input", () => (sv.disabled = !ti.value.trim() || ti.value.trim() === p.title));
+    ti.addEventListener("keydown", (e) => { if (e.key === "Enter" && !sv.disabled) sv.click(); });
+    sv.addEventListener("click", () => busy(sv, () => renamePage(p, ti.value)));
+    const grid = document.createElement("div"); grid.className = "fgrid"; body.appendChild(grid);
+    factsInto(grid, p);
     const more = document.createElement("a");
-    more.className = "more"; more.href = `#/page/${p.number}`; more.textContent = "Page name, picture and sticker address ›";
+    more.className = "more"; more.href = `#/page/${p.number}`; more.textContent = "Picture and sticker address ›";
     body.appendChild(more);
+    body.querySelectorAll("textarea").forEach(grow); // size each box to its fact now that it's visible
   };
   document.querySelectorAll("details.pg").forEach((d) => {
     if (d.open) fill(d);
@@ -282,25 +313,13 @@ function renderPage(num) {
     </div>
 
     <p class="label" style="margin-top:2rem">Facts</p>
-    <div id="facts"></div>`;
+    <div id="facts" class="fgrid"></div>`;
 
   // --- page details
   const ti = $("#ti"), savep = $("#savep");
   const dirty = () => (savep.disabled = !ti.value.trim() || ti.value === p.title);
   ti.addEventListener("input", dirty);
-  savep.addEventListener("click", () => busy(savep, async () => {
-    const title = ti.value.trim();
-    const changes = [];
-    const want = `${p.number}-${slugify(title)}`;
-    let target = p;
-    if (want !== p.folder) { // keep the folder name in step with the page name (the number never changes)
-      for (const f of p.files) changes.push({ path: `content/${want}/${f.name}`, sha: f.sha }, { path: pagePath(p, f.name), delete: true });
-      target = { ...p, folder: want };
-    }
-    changes.push({ path: pagePath(target, "page.md"), content: b64text(pageMd(title)) });
-    await save(`Page ${p.number}: ${title}`, changes);
-    toast("Saved. Live in about a minute.");
-  }));
+  savep.addEventListener("click", () => busy(savep, () => renamePage(p, ti.value)));
 
   // --- picture
   const picInput = document.createElement("input"); picInput.type = "file"; picInput.accept = "image/*"; $("#picbtns").appendChild(picInput);
@@ -324,12 +343,27 @@ function renderPage(num) {
   factsInto($("#facts"), p);
 }
 
+// Saves a page's new name. The folder name follows the name; the number never changes.
+async function renamePage(p, title) {
+  title = title.trim();
+  const changes = [];
+  const want = `${p.number}-${slugify(title)}`;
+  let target = p;
+  if (want !== p.folder) {
+    for (const f of p.files) changes.push({ path: `content/${want}/${f.name}`, sha: f.sha }, { path: pagePath(p, f.name), delete: true });
+    target = { ...p, folder: want };
+  }
+  changes.push({ path: pagePath(target, "page.md"), content: b64text(pageMd(title)) });
+  await save(`Page ${p.number}: ${title}`, changes);
+  toast("Saved. Live in about a minute.");
+}
+
 // Every fact card for a page, then the "new fact" card, appended to container.
 // Used on the page screen and inside a twirled-open page on the home screen.
 function factsInto(container, p) {
   for (const f of p.facts) container.appendChild(factCard(p, f));
   const el = document.createElement("div");
-  el.className = "fact";
+  el.className = "fact newf";
   el.innerHTML = `
       <div class="fhead"><span class="label" style="margin:0">New fact</span></div>
       <textarea class="nf" placeholder="Something wonderful about ${esc((p.title || "this page").toLowerCase())}…"></textarea>

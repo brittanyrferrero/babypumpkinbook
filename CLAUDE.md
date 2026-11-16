@@ -13,8 +13,8 @@ audio. Static site, deployed by Vercel from `main`.
 - `content/<N>-<name>/` — the book pages. The number is the tag URL (`/p/N`)
   and must never change once a sticker is written; the name is cosmetic.
 - `build.mjs` — the whole build, no dependencies. `npm run build` → `dist/`.
-  Pages use a Mason-style minimal design: always-dark gray, Fraunces headings,
-  Figtree text, hairline dividers instead of cards, sage green accent.
+  Pages use a Mason-style minimal design: always-dark gray, all sans serif (Figtree),
+  hairline dividers instead of cards, sage green accent.
 - `admin/index.html` + `api/` — the `/admin` dashboard. Password login
   (`ADMIN_PASSWORD`), and every save is a commit to `main` through the GitHub
   API (`GITHUB_TOKEN`). `record/index.html` is the family page at `/record`

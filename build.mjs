@@ -79,7 +79,7 @@ const pages = folders.map(readPage).filter((p) => p.facts.length > 0)
 
 // ---------- templates ----------
 const CSS = `
-:root{--bg:#1c1c1f;--surface:#242428;--raised:#2a2a2f;--border:#323238;--border-strong:#44444b;--hover:rgba(255,255,255,.035);--accent:#9fcdb4;--accent-ink:#1c1c1f;--accent-light:rgba(159,205,180,.12);--accent-mid:#5f8a74;--text:#ededef;--ink-soft:#c9c9ce;--muted:#9a9aa2;--faint:#64646c;--danger:#ff7a66;--danger-light:rgba(255,122,102,.12);--shadow-sm:none;--shadow-md:none;--serif:"Fraunces",Georgia,serif;--body:"Figtree",system-ui,-apple-system,sans-serif;color-scheme:dark}
+:root{--bg:#1c1c1f;--surface:#242428;--raised:#2a2a2f;--border:#323238;--border-strong:#44444b;--hover:rgba(255,255,255,.035);--accent:#9fcdb4;--accent-ink:#1c1c1f;--accent-light:rgba(159,205,180,.12);--accent-mid:#5f8a74;--text:#ededef;--ink-soft:#c9c9ce;--muted:#9a9aa2;--faint:#64646c;--danger:#ff7a66;--danger-light:rgba(255,122,102,.12);--shadow-sm:none;--shadow-md:none;--serif:"Figtree",system-ui,-apple-system,sans-serif;--body:"Figtree",system-ui,-apple-system,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.5;min-height:100svh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
 main{flex:1;width:100%;max-width:34rem;margin:0 auto;padding:3rem 1.25rem 2rem}
@@ -114,7 +114,7 @@ function shell({ title, body, head = "" }) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&display=swap">
 <title>${esc(title)}</title>
 <style>${CSS}</style>
 ${head}
