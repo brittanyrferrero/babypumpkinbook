@@ -36,7 +36,14 @@ h2{font-weight:500;font-size:1rem;margin:0}
 .row:first-child{border-top:0}
 .row:hover{background:var(--raised)}
 .meta{color:var(--muted);font-size:.8rem}
-.chev{color:var(--faint);font-size:1.2rem}
+.chev{color:var(--faint);font-size:1.2rem;transition:transform .15s}
+details.pg+details.pg{border-top:1px solid var(--border)}
+details.pg>summary{list-style:none;cursor:pointer;border-top:0}
+details.pg>summary::-webkit-details-marker{display:none}
+details.pg[open]>summary{background:var(--raised)}
+details.pg[open]>summary .chev{transform:rotate(90deg)}
+.pgbody{padding:1rem 1rem .75rem;background:var(--raised);border-top:1px solid var(--border)}
+.pgbody .more{display:inline-block;color:var(--muted);font-size:.85rem;text-decoration:none;margin:.15rem 0 .25rem}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:.55rem 1.05rem;font:inherit;font-size:.88rem;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap}
 .btn.ghost{background:var(--surface);color:var(--accent);border-color:var(--accent-mid)}
 .btn.quiet{background:transparent;color:var(--muted);border-color:var(--border)}
@@ -211,21 +218,36 @@ function renderLogin(err = "") {
   });
 }
 
+const OPEN = new Set(); // page numbers twirled open on the home screen (kept across saves)
+
 function renderHome() {
   const pages = DATA.pages;
   const rows = pages.map((p) => {
     const rec = p.facts.filter((f) => f.recording).length, au = p.facts.filter((f) => f.audio).length;
-    return `<a class="row" href="#/page/${p.number}">
+    return `<details class="pg" data-n="${p.number}"${OPEN.has(p.number) ? " open" : ""}><summary class="row">
       <span><span class="label" style="margin:0">Page ${p.number}</span><h2>${esc(p.title || "Untitled")}</h2>
       <span class="meta">${p.facts.length} fact${p.facts.length === 1 ? "" : "s"} · ${rec ? `${rec} recorded by people, ` : ""}${au - rec} AI voice${au - rec === 1 ? "" : "s"}${p.facts.length - au ? `, ${p.facts.length - au} without sound` : ""}</span></span>
-      <span class="chev">›</span></a>`;
+      <span class="chev">›</span></summary><div class="pgbody"></div></details>`;
   }).join("");
   $("#app").innerHTML = `
     <p class="label">The book</p>
     <h1>Every <em>page</em></h1>
-    <p class="sub">Each page has a sticker in the book. Tap a page to change its name, its facts or its recordings.</p>
+    <p class="sub">Each page has a sticker in the book. Tap a page to see and edit its facts and recordings.</p>
     <div class="list">${rows || `<p class="empty">No pages yet.</p>`}</div>
     <div class="btns"><a class="btn" href="#/new">+ New page</a></div>`;
+  const fill = (d) => {
+    const body = $(".pgbody", d);
+    if (body.childElementCount) return;
+    const p = pages.find((x) => x.number === Number(d.dataset.n));
+    factsInto(body, p);
+    const more = document.createElement("a");
+    more.className = "more"; more.href = `#/page/${p.number}`; more.textContent = "Page name, picture and sticker address ›";
+    body.appendChild(more);
+  };
+  document.querySelectorAll("details.pg").forEach((d) => {
+    if (d.open) fill(d);
+    d.addEventListener("toggle", () => { if (d.open) { OPEN.add(Number(d.dataset.n)); fill(d); } else OPEN.delete(Number(d.dataset.n)); });
+  });
 }
 
 function renderPage(num) {
@@ -257,14 +279,7 @@ function renderPage(num) {
     </div>
 
     <p class="label" style="margin-top:2rem">Facts</p>
-    <div id="facts"></div>
-    <div class="fact" id="newfact">
-      <div class="fhead"><span class="label" style="margin:0">New fact</span></div>
-      <textarea id="nf" placeholder="Something wonderful about ${esc((p.title || "this page").toLowerCase())}…"></textarea>
-      <p class="hint">**bold** and *italic* work.</p>
-      <div id="nfstage"></div>
-      <div class="btns" style="margin-top:.75rem"><button class="btn" id="addf" disabled>Add fact</button><button class="btn ghost" id="nfrec">Attach a recording</button></div>
-    </div>`;
+    <div id="facts"></div>`;
 
   // --- page details
   const ti = $("#ti"), savep = $("#savep");
@@ -303,25 +318,37 @@ function renderPage(num) {
   $("#copy").addEventListener("click", async () => { try { await navigator.clipboard.writeText(tagUrl); toast("Copied."); } catch { toast(tagUrl); } });
 
   // --- facts
-  const wrap = $("#facts");
-  for (const f of p.facts) wrap.appendChild(factCard(p, f));
+  factsInto($("#facts"), p);
+}
 
-  // --- new fact
-  const nf = $("#nf"), addf = $("#addf");
+// Every fact card for a page, then the "new fact" card, appended to container.
+// Used on the page screen and inside a twirled-open page on the home screen.
+function factsInto(container, p) {
+  for (const f of p.facts) container.appendChild(factCard(p, f));
+  const el = document.createElement("div");
+  el.className = "fact";
+  el.innerHTML = `
+      <div class="fhead"><span class="label" style="margin:0">New fact</span></div>
+      <textarea class="nf" placeholder="Something wonderful about ${esc((p.title || "this page").toLowerCase())}…"></textarea>
+      <p class="hint">**bold** and *italic* work.</p>
+      <div class="nfstage"></div>
+      <div class="btns" style="margin-top:.75rem"><button class="btn addf" disabled>Add fact</button><button class="btn ghost nfrec">Attach a recording</button></div>`;
+  container.appendChild(el);
+  const nf = $(".nf", el), addf = $(".addf", el);
   let nfAudio = null;
   nf.addEventListener("input", () => (addf.disabled = !nf.value.trim()));
-  const pickNew = recordingPicker($("#newfact"), (bytes, secs, url) => {
+  const pickNew = recordingPicker(el, (bytes, secs, url) => {
     nfAudio = { bytes };
-    $("#nfstage").innerHTML = `<div class="stage"><span class="badge rec">New recording · ${secs.toFixed(0)}s</span><audio controls src="${url}"></audio>
-      <label class="f" for="nfby" style="margin-top:.5rem">Read by (optional)</label><input type="text" id="nfby" placeholder="e.g. Grandma" maxlength="40"></div>`;
-    $("#nfrec").textContent = "Choose a different recording";
+    $(".nfstage", el).innerHTML = `<div class="stage"><span class="badge rec">New recording · ${secs.toFixed(0)}s</span><audio controls src="${url}"></audio>
+      <label class="f" style="margin-top:.5rem">Read by (optional)</label><input type="text" class="nfby" placeholder="e.g. Grandma" maxlength="40"></div>`;
+    $(".nfrec", el).textContent = "Choose a different recording";
   });
-  $("#nfrec").addEventListener("click", pickNew);
+  $(".nfrec", el).addEventListener("click", pickNew);
   addf.addEventListener("click", () => busy(addf, async () => {
     const max = p.facts.reduce((m, f) => Math.max(m, Number(f.stem)), 0);
     const stem = pad(max + 1);
     const changes = [{ path: pagePath(p, `${stem}.md`), content: b64text(nf.value.trim() + "\n") }];
-    if (nfAudio) changes.push(...audioChanges(p, stem, nfAudio.bytes, $("#nfby")?.value || ""));
+    if (nfAudio) changes.push(...audioChanges(p, stem, nfAudio.bytes, $(".nfby", el)?.value || ""));
     await save(`Page ${p.number}: new fact ${stem}`, changes);
     toast(nfAudio ? "Fact added." : "Fact added. It'll show as text until it gets a recording.");
   }));
