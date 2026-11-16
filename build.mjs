@@ -79,33 +79,31 @@ const pages = folders.map(readPage).filter((p) => p.facts.length > 0)
 
 // ---------- templates ----------
 const CSS = `
-:root{--bg:#f7f9f8;--surface:#ffffff;--raised:#eef3f1;--border:#dde5e1;--border-strong:#c6d2cc;--accent:#4d6e5e;--accent-ink:#fff;--accent-light:#e8f0ec;--accent-mid:#9abfae;--text:#1f2a26;--muted:#75857f;--faint:#a6b4ae;--weave:transparent;--shadow-sm:0 1px 2px rgba(31,42,38,.05),0 2px 6px rgba(31,42,38,.04);--shadow-md:0 2px 8px rgba(31,42,38,.06),0 6px 28px rgba(31,42,38,.07);color-scheme:light dark}
-@media(prefers-color-scheme:dark){:root{--bg:#151917;--surface:#1e2421;--raised:#262d2a;--border:#323b37;--border-strong:#414c47;--accent:#9abfae;--accent-ink:#151917;--accent-light:#22302a;--accent-mid:#5f7d6f;--text:#e8eeeb;--muted:#98a6a0;--faint:#5f6b66;--weave:transparent;--shadow-sm:0 1px 2px rgba(0,0,0,.25);--shadow-md:0 2px 8px rgba(0,0,0,.25),0 6px 28px rgba(0,0,0,.3)}}
+:root{--bg:#1c1c1f;--surface:#242428;--raised:#2a2a2f;--border:#323238;--border-strong:#44444b;--hover:rgba(255,255,255,.035);--accent:#9fcdb4;--accent-ink:#1c1c1f;--accent-light:rgba(159,205,180,.12);--accent-mid:#5f8a74;--text:#ededef;--ink-soft:#c9c9ce;--muted:#9a9aa2;--faint:#64646c;--danger:#ff7a66;--danger-light:rgba(255,122,102,.12);--shadow-sm:none;--shadow-md:none;--serif:"Fraunces",Georgia,serif;--body:"Figtree",system-ui,-apple-system,sans-serif;color-scheme:dark}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
-body{margin:0;background-color:var(--bg);background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px),repeating-linear-gradient(90deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px);color:var(--text);font-family:"Inter",system-ui,-apple-system,sans-serif;line-height:1.5;min-height:100svh;display:flex;flex-direction:column}
-main{flex:1;width:100%;max-width:36rem;margin:0 auto;padding:2.25rem 1.25rem 2rem}
-.label{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 .75rem}
-h1{font-size:2.4rem;font-weight:300;letter-spacing:-.03em;line-height:1.1;margin:0 0 .4rem}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.5;min-height:100svh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+main{flex:1;width:100%;max-width:34rem;margin:0 auto;padding:3rem 1.25rem 2rem}
+.label{font-size:.82rem;color:var(--faint);margin:0 0 .6rem}
+h1{font-family:var(--serif);font-size:2.5rem;font-weight:400;letter-spacing:-.02em;line-height:1.1;margin:0 0 1.5rem}
 h1 em{font-style:italic;color:var(--accent)}
-.blurb{color:var(--muted);margin:0 0 1.5rem;font-size:1.02rem}
-.cover{width:100%;border-radius:16px;margin:0 0 1.25rem;display:block;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
-.fact{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.6rem 1.5rem;font-size:1.32rem;line-height:1.5;box-shadow:var(--shadow-md)}
+.blurb{color:var(--muted);margin:-.75rem 0 1.5rem;font-size:1rem}
+.cover{width:100%;border-radius:12px;margin:0 0 1.5rem;display:block}
+.fact{font-size:1.4rem;line-height:1.55;padding:1.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
 .fact p{margin:0 0 .75em}.fact p:last-child{margin:0}
 .fact strong{color:var(--accent);font-weight:600}
 .fact a{color:var(--accent)}
-.audio{margin:1.25rem 0 0}
-.play{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;min-height:3.9rem;border:1px solid var(--accent);border-radius:999px;padding:1rem 1.25rem;font:inherit;font-size:1.15rem;font-weight:500;letter-spacing:.01em;background:var(--accent);color:var(--accent-ink);cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .08s,background .15s}
+.audio{margin:1.75rem 0 0}
+.play{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;min-height:3.8rem;border:1px solid var(--text);border-radius:999px;padding:1rem 1.25rem;font:inherit;font-size:1.1rem;font-weight:500;background:var(--text);color:var(--bg);cursor:pointer;transition:transform .08s}
 .play:active{transform:scale(.98)}
-.play[aria-pressed="true"]{background:var(--accent-light);color:var(--accent);border-color:var(--accent-mid)}
-.btn{display:inline-block;text-align:center;text-decoration:none;border:1px solid var(--accent);color:var(--accent-ink);background:var(--accent);border-radius:999px;padding:.7rem 1.2rem;font-weight:500;font-size:.95rem}
-footer{text-align:center;color:var(--faint);font-size:.66rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:1rem 1.25rem 1.8rem}
+.play[aria-pressed="true"]{background:transparent;color:var(--text);border-color:var(--border-strong)}
+.btn{display:inline-block;text-align:center;text-decoration:none;border:1px solid var(--text);color:var(--bg);background:var(--text);border-radius:999px;padding:.6rem 1.2rem;font-weight:500;font-size:.95rem}
+footer{text-align:center;color:var(--faint);font-size:.78rem;padding:1rem 1.25rem 1.8rem}
 footer a{color:inherit}
-ul.pages{list-style:none;padding:0;margin:1.5rem 0 0;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden}
-ul.pages li{padding:.95rem 1.1rem;border-top:1px solid var(--border)}
-ul.pages li:first-child{border-top:0}
-ul.pages a{color:inherit;text-decoration:none;font-weight:500;font-size:1.05rem}
-ul.pages small{display:block;color:var(--muted);margin-top:.15rem;font-size:.8rem}
-code{background:var(--raised);border-radius:6px;padding:.1em .4em;font-size:.88em}
+ul.pages{list-style:none;padding:0;margin:1.75rem 0 0;border-top:1px solid var(--border)}
+ul.pages li{padding:1rem .25rem;border-bottom:1px solid var(--border)}
+ul.pages a{color:inherit;text-decoration:none;font-family:var(--serif);font-size:1.25rem}
+ul.pages small{display:block;color:var(--muted);margin-top:.2rem;font-size:.82rem}
+code{background:var(--surface);border-radius:6px;padding:.1em .4em;font-size:.88em}
 `;
 
 function shell({ title, body, head = "" }) {
@@ -116,7 +114,7 @@ function shell({ title, body, head = "" }) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;1,14..32,300;1,14..32,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&display=swap">
 <title>${esc(title)}</title>
 <style>${CSS}</style>
 ${head}
