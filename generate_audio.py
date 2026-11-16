@@ -4,7 +4,7 @@ Batch TTS for the fact pages. Same engine and post-processing as wizards-poker-w
 
 Reads:  content/<N>-<name>/NN.md        (one fact per file)
 Writes: content/<N>-<name>/NN.mp3       (44.1 kHz mono, 192 kbps, loudness-normalised)
-Skips facts that already have audio of any kind (mp3/m4a/ogg/wav), so a
+Skips facts that already have audio of any kind (mp3/m4a/mp4/ogg/wav), so a
 human recording dropped next to a fact is never overwritten. Safe to resume.
 
 Voices: voices.json (Eamon and Brittany today). Each fact gets one voice,
@@ -28,7 +28,7 @@ from pathlib import Path
 
 CONTENT     = Path(__file__).parent / "content"
 VOICES_JSON = Path(__file__).parent / "voices.json"
-AUDIO_EXT   = {".mp3", ".m4a", ".ogg", ".wav"}
+AUDIO_EXT   = {".mp3", ".m4a", ".mp4", ".ogg", ".wav"}
 TRAILING_SILENCE = 0.6  # seconds
 
 

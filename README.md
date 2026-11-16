@@ -15,7 +15,28 @@ about a minute.
 | `/random` | A random fact from a random page. Nice for a tag on the cover, or just a link to share. |
 | `/` | A plain list of all pages, for us, not for the reader. |
 
-## Adding or editing content (no coding needed)
+## The dashboard (easiest way to edit)
+
+Go to `/admin` on the site and log in with the shared password. From there you
+can rename pages, change their emoji and description, add a picture, add, edit
+or delete facts, and upload recordings (any audio file or a phone video; only
+the sound is kept). Each save is a commit to this repo, so the site updates
+about a minute later, the same as any other push. The header shows
+"Publishing…" and then "Live".
+
+Recordings uploaded there are converted in the browser to a mono mp3, trimmed
+and level-matched to the AI clips, and saved as `NN.mp3`. They're listed in
+`content/recordings.json` (key `<page number>/<NN>`, with who read it), which
+is how the dashboard tells them apart from AI readings. **When re-voicing,
+don't delete mp3s that are listed there.**
+
+Setup (already done once; only needed for a new Vercel project): the
+dashboard needs two environment variables in Vercel, `ADMIN_PASSWORD` (the
+shared password) and `GITHUB_TOKEN` (a fine-grained GitHub token for this repo
+only, with Contents: read and write, and Commit statuses: read). The code is
+`admin/index.html` and `api/`.
+
+## Adding or editing content by hand
 
 Everything lives in the `content/` folder. One folder per book page, named
 `<page number>-<anything>`. The number is what the tag in the book points at;
@@ -26,7 +47,7 @@ content/
   3-ocean/
     page.md      "# Title" on the first line, an optional one-line blurb, and an optional "emoji: 🌊" line
     01.md        one fact per file, numbered. Plain text; **bold** and *italic* work.
-    01.mp3       the audio for fact 01 (optional; mp3, m4a, ogg or wav all fine)
+    01.mp3       the audio for fact 01 (optional; mp3, m4a, mp4, ogg or wav; mp4 plays as sound only)
     02.md
     02.mp3
     cover.jpg    optional picture shown above the fact
@@ -79,7 +100,8 @@ points at them by filename.
    control there is. Leave `gain` at 1.0 for prepped voices.
 4. **Voice the facts.** New facts pick from all enabled voices automatically. To
    re-voice existing facts with the new mix, delete their mp3s first
-   (`rm content/*/*.mp3` for everything, or just the ones you want), then run
+   (`rm content/*/*.mp3` for everything, or just the ones you want, but **not**
+   the human recordings listed in `content/recordings.json`), then run
    `generate_audio.py`.
 
 To take a voice out of rotation without deleting it, set `"enabled": false`.

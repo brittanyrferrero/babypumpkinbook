@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Book dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;1,14..32,300&display=swap">
+<style>
+:root{--bg:#f5efe4;--surface:#fdf8f1;--raised:#f0e8da;--border:#e0d5c4;--border-strong:#cdc0ac;--accent:#4d6e5e;--accent-ink:#fff;--accent-light:#eaf0eb;--accent-mid:#9abfae;--text:#2a2218;--muted:#9a8e7e;--faint:#c4b8a6;--danger:#a4553f;--danger-light:#f6e6df;--weave:rgba(160,130,90,.05);--shadow-sm:0 1px 2px rgba(42,34,24,.06),0 2px 6px rgba(42,34,24,.05);--shadow-md:0 2px 8px rgba(42,34,24,.07),0 6px 28px rgba(42,34,24,.08);color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1915;--surface:#25211c;--raised:#2d2822;--border:#3a342c;--border-strong:#4a4238;--accent:#9abfae;--accent-ink:#1c1915;--accent-light:#26302b;--accent-mid:#5f7d6f;--text:#efe7da;--muted:#a3978a;--faint:#6f665b;--danger:#e09a83;--danger-light:#3a2620;--weave:rgba(240,220,190,.025);--shadow-sm:0 1px 2px rgba(0,0,0,.25);--shadow-md:0 2px 8px rgba(0,0,0,.25),0 6px 28px rgba(0,0,0,.3)}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background-color:var(--bg);background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px),repeating-linear-gradient(90deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px);color:var(--text);font:15px/1.5 "Inter",system-ui,-apple-system,sans-serif;min-height:100svh}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:1rem;justify-content:space-between;padding:.85rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{font-weight:300;font-size:1.15rem;letter-spacing:-.02em;color:var(--text);text-decoration:none}
+.brand em{color:var(--accent)}
+.hright{display:flex;align-items:center;gap:.75rem;font-size:.85rem}
+.hright a,.linkbtn{color:var(--muted);text-decoration:none;background:none;border:0;font:inherit;cursor:pointer;padding:0}
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:500;padding:.25rem .65rem;border-radius:999px;background:var(--raised);color:var(--muted);border:1px solid var(--border)}
+.pill.ok{background:var(--accent-light);color:var(--accent);border-color:var(--accent-mid)}
+.pill.bad{background:var(--danger-light);color:var(--danger);border-color:var(--danger)}
+.dot{width:.45rem;height:.45rem;border-radius:50%;background:currentColor}
+.pill.busy .dot{animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.25}}
+main{max-width:46rem;margin:0 auto;padding:2rem 1.25rem 5rem}
+.label{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-weight:300;font-size:2rem;letter-spacing:-.03em;line-height:1.15;margin:0 0 .35rem}
+h1 em{color:var(--accent)}
+h2{font-weight:500;font-size:1rem;margin:0}
+.sub{color:var(--muted);margin:0 0 1.75rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);padding:1.25rem;margin:0 0 1rem}
+.list{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden;margin:0 0 1rem}
+.row{display:grid;grid-template-columns:2.75rem 1fr auto;gap:.9rem;align-items:center;padding:.9rem 1.1rem;border-top:1px solid var(--border);color:inherit;text-decoration:none}
+.row:first-child{border-top:0}
+.row:hover{background:var(--raised)}
+.em{display:grid;place-items:center;width:2.75rem;height:2.75rem;border-radius:12px;background:var(--raised);font-size:1.5rem}
+.meta{color:var(--muted);font-size:.8rem}
+.chev{color:var(--faint);font-size:1.2rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:.55rem 1.05rem;font:inherit;font-size:.88rem;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn.ghost{background:var(--surface);color:var(--accent);border-color:var(--accent-mid)}
+.btn.quiet{background:transparent;color:var(--muted);border-color:var(--border)}
+.btn.danger{background:transparent;color:var(--danger);border-color:var(--border)}
+.btn:disabled{opacity:.45;cursor:default}
+.btns{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+label.f{display:block;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 .35rem}
+input[type=text],input[type=password],textarea{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.6rem .75rem}
+input:focus,textarea:focus{outline:2px solid var(--accent-mid);outline-offset:0;border-color:var(--accent-mid)}
+textarea{resize:vertical;min-height:5.5rem;line-height:1.5}
+.grid{display:grid;grid-template-columns:5rem 1fr;gap:.9rem;margin:0 0 .9rem}
+.field{margin:0 0 .9rem}
+.hint{color:var(--muted);font-size:.8rem;margin:.35rem 0 0}
+.fact{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);padding:1.1rem 1.1rem 1rem;margin:0 0 .85rem}
+.fhead{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin:0 0 .6rem}
+.badge{font-size:.72rem;font-weight:500;padding:.18rem .55rem;border-radius:999px;background:var(--raised);color:var(--muted)}
+.badge.rec{background:var(--accent-light);color:var(--accent)}
+audio{width:100%;height:2.4rem;margin:.7rem 0 .2rem}
+.stage{margin:.75rem 0 0;padding:.85rem;border-radius:12px;background:var(--raised)}
+.check{display:flex;gap:.5rem;align-items:flex-start;font-size:.85rem;color:var(--muted);margin:.6rem 0 0}
+.cover{display:block;max-width:100%;max-height:14rem;border-radius:12px;border:1px solid var(--border);margin:0 0 .75rem}
+.url{display:flex;gap:.5rem;align-items:center;font-size:.85rem}
+.url code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--raised);border-radius:8px;padding:.45rem .6rem}
+.back{display:inline-block;color:var(--muted);text-decoration:none;font-size:.85rem;margin:0 0 1.25rem}
+.err{color:var(--danger);font-size:.85rem;margin:.5rem 0 0}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.1rem;border-radius:999px;font-size:.88rem;box-shadow:var(--shadow-md);z-index:9;max-width:calc(100% - 2rem)}
+.login{max-width:22rem;margin:12vh auto 0}
+.empty{color:var(--muted);text-align:center;padding:3rem 0}
+input[type=file]{display:none}
+@media(max-width:520px){.grid{grid-template-columns:4rem 1fr}header{padding:.75rem 1rem}.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="#/">Pumpkin's book · <em>dashboard</em></a>
+  <div class="hright"><span id="pub"></span><a class="hide-sm" href="/" target="_blank">View site</a><button class="linkbtn" id="logout" hidden>Log out</button></div>
+</header>
+<main id="app"><p class="empty">Loading…</p></main>
+<div class="toast" id="toast" hidden></div>
+<script>
+"use strict";
+// ---------------------------------------------------------------- state
+let DATA = null;            // { head, pages, recordings }
+const pending = new Set();  // commit shas waiting for Vercel to deploy
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = (n) => String(n).padStart(2, "0");
+const slugify = (t) => (t.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30).replace(/-+$/, "")) || "page";
+const today = () => new Date().toISOString().slice(0, 10);
+
+function toast(msg, ms = 3500) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), ms);
+}
+
+// ---------------------------------------------------------------- api
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { "x-pb": "1", ...(opts.body ? { "content-type": "application/json" } : {}) }, credentials: "same-origin" });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && path !== "/api/login") { DATA = null; renderLogin(); throw new Error("Please log in again."); }
+  if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
+  return data;
+}
+async function load() {
+  DATA = await api("/api/content");
+  $("#logout").hidden = false;
+}
+async function save(message, changes) {
+  const { sha } = await api("/api/save", { method: "POST", body: JSON.stringify({ message, changes }) });
+  pending.add(sha); renderPub(); poll();
+  await load();
+  route(false);
+}
+async function poll() {
+  if (poll.running) return; poll.running = true;
+  while (pending.size) {
+    await new Promise((r) => setTimeout(r, 5000));
+    for (const sha of [...pending]) {
+      try {
+        const { state } = await api(`/api/status?sha=${sha}`);
+        if (state === "success") { pending.delete(sha); poll.last = "ok"; }
+        else if (state === "failure") { pending.delete(sha); poll.last = "bad"; }
+      } catch { /* keep trying */ }
+    }
+    renderPub();
+  }
+  poll.running = false;
+}
+function renderPub() {
+  const el = $("#pub");
+  if (pending.size) el.innerHTML = `<span class="pill busy"><span class="dot"></span>Publishing…</span>`;
+  else if (poll.last === "ok") el.innerHTML = `<span class="pill ok"><span class="dot"></span>Live</span>`;
+  else if (poll.last === "bad") el.innerHTML = `<span class="pill bad"><span class="dot"></span>Publish failed</span>`;
+  else el.innerHTML = "";
+}
+
+// ---------------------------------------------------------------- bytes
+function b64(bytes) {
+  let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+const b64text = (t) => b64(new TextEncoder().encode(t));
+const fileUrl = (f) => `/api/file?sha=${f.sha}&name=${encodeURIComponent(f.name)}`;
+
+// Any audio or video file → a small, level-matched mono mp3 (sound only).
+// Done in the browser so phone videos of any size fit, and every recording
+// plays at the same loudness as the AI-read ones.
+let lameLoading = null;
+function loadLame() {
+  return (lameLoading ||= new Promise((ok, no) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js";
+    s.onload = ok; s.onerror = () => no(new Error("Couldn't load the mp3 encoder. Check the connection and try again."));
+    document.head.appendChild(s);
+  }));
+}
+async function toMp3(file) {
+  const RATE = 44100;
+  const [, buf] = await Promise.all([loadLame(), file.arrayBuffer()]);
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const ctx = new AC();
+  let decoded;
+  try { decoded = await new Promise((ok, no) => ctx.decodeAudioData(buf, ok, no)); }
+  catch { throw new Error("Couldn't read the sound in that file. Try an mp3, m4a or mp4."); }
+  finally { ctx.close && ctx.close(); }
+  if (decoded.duration > 300) throw new Error("That's over 5 minutes. Please trim it to just the fact.");
+  // mix to mono at 44.1 kHz
+  const off = new OfflineAudioContext(1, Math.ceil(decoded.duration * RATE), RATE);
+  const src = off.createBufferSource(); src.buffer = decoded; src.connect(off.destination); src.start();
+  const x = (await off.startRendering()).getChannelData(0);
+  // trim silence: keep 0.15 s before the first sound and 0.6 s after the last
+  // "sound" means within 26 dB of the loudest moment, so quiet recordings work too
+  let top = 0; for (let i = 0; i < x.length; i++) { const v = Math.abs(x[i]); if (v > top) top = v; }
+  if (top < 1e-4) throw new Error("That file seems to be silent.");
+  const thr = top * 0.05; let a = 0, b = x.length - 1;
+  while (a < x.length && Math.abs(x[a]) < thr) a++;
+  while (b > a && Math.abs(x[b]) < thr) b--;
+  if (a >= b) throw new Error("That file seems to be silent.");
+  a = Math.max(0, a - Math.round(0.15 * RATE)); b = Math.min(x.length, b + Math.round(0.6 * RATE));
+  const y = x.slice(a, b);
+  // level: about -17 LUFS like the AI clips (speech RMS ≈ -14 dBFS), peaks no higher than -1.5 dBFS
+  let sum = 0, n = 0, peak = 0;
+  for (let i = 0; i < y.length; i++) { const v = Math.abs(y[i]); if (v > peak) peak = v; if (v > thr) { sum += v * v; n++; } }
+  const rms = Math.sqrt(sum / Math.max(1, n));
+  const gain = Math.min(0.2 / rms, 0.84 / peak);
+  const pcm = new Int16Array(y.length);
+  for (let i = 0; i < y.length; i++) pcm[i] = Math.max(-32768, Math.min(32767, Math.round(y[i] * gain * 32767)));
+  const enc = new lamejs.Mp3Encoder(1, RATE, 128), parts = [];
+  for (let i = 0; i < pcm.length; i += 1152) { const o = enc.encodeBuffer(pcm.subarray(i, i + 1152)); if (o.length) parts.push(new Uint8Array(o)); }
+  const end = enc.flush(); if (end.length) parts.push(new Uint8Array(end));
+  const out = new Uint8Array(parts.reduce((s, p) => s + p.length, 0)); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; }
+  return { bytes: out, seconds: y.length / RATE };
+}
+// Any picture → a jpeg no wider than 1600 px.
+async function toJpeg(file) {
+  const img = await createImageBitmap(file).catch(() => { throw new Error("Couldn't open that picture."); });
+  const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+  const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.85));
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
+// ---------------------------------------------------------------- helpers for changes
+const pagePath = (p, name) => `content/${p.folder}/${name}`;
+const pageMd = (title, blurb, emoji) => `# ${title.trim()}\n${blurb.trim() ? blurb.trim() + "\n" : ""}${emoji.trim() ? "emoji: " + emoji.trim() + "\n" : ""}`;
+function recordingsChange(mutate) {
+  const r = JSON.parse(JSON.stringify(DATA.recordings || {})); mutate(r);
+  const sorted = Object.fromEntries(Object.keys(r).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map((k) => [k, r[k]]));
+  return { path: "content/recordings.json", content: b64text(JSON.stringify(sorted, null, 2) + "\n") };
+}
+function audioChanges(p, stem, mp3, by) {
+  const existing = p.files.filter((f) => f.name.startsWith(stem + ".") && !f.name.endsWith(".md") && f.name !== stem + ".mp3");
+  return [
+    { path: pagePath(p, `${stem}.mp3`), content: b64(mp3) },
+    ...existing.map((f) => ({ path: pagePath(p, f.name), delete: true })),
+    recordingsChange((r) => (r[`${p.number}/${stem}`] = { by: by.trim() || null, at: today() })),
+  ];
+}
+async function busy(btn, fn) {
+  const label = btn.textContent; btn.disabled = true; btn.textContent = "Saving…";
+  try { await fn(); } catch (e) { toast(e.message, 6000); btn.disabled = false; btn.textContent = label; }
+}
+
+// A "pick a recording" control: file → converted mp3 preview → callback.
+function recordingPicker(container, onReady) {
+  const input = document.createElement("input");
+  input.type = "file"; input.accept = "audio/*,video/mp4,video/quicktime,.mp4,.m4a,.mp3,.wav,.ogg,.mov";
+  container.appendChild(input);
+  input.addEventListener("change", async () => {
+    const file = input.files[0]; input.value = ""; if (!file) return;
+    toast("Getting the sound ready…", 20000);
+    try {
+      const { bytes, seconds } = await toMp3(file);
+      $("#toast").hidden = true;
+      onReady(bytes, seconds, URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" })));
+    } catch (e) { toast(e.message, 6000); }
+  });
+  return () => input.click();
+}
+
+// ---------------------------------------------------------------- views
+function renderLogin(err = "") {
+  $("#logout").hidden = true;
+  $("#app").innerHTML = `<form class="login card" id="lf">
+    <p class="label">Pumpkin's book of wonders</p>
+    <h1>Welcome <em>back</em></h1>
+    <p class="sub" style="margin-bottom:1.1rem">Enter the dashboard password.</p>
+    <input type="password" id="pw" autocomplete="current-password" required>
+    <div class="btns" style="margin-top:.9rem"><button class="btn" type="submit">Log in</button></div>
+    ${err ? `<p class="err">${esc(err)}</p>` : ""}
+  </form>`;
+  $("#pw").focus();
+  $("#lf").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("#lf button"); btn.disabled = true; btn.textContent = "Checking…";
+    try { await api("/api/login", { method: "POST", body: JSON.stringify({ password: $("#pw").value }) }); await load(); route(); }
+    catch (e) { renderLogin(e.message); }
+  });
+}
+
+function renderHome() {
+  const pages = DATA.pages;
+  const rows = pages.map((p) => {
+    const rec = p.facts.filter((f) => f.recording).length, au = p.facts.filter((f) => f.audio).length;
+    return `<a class="row" href="#/page/${p.number}">
+      <span class="em">${esc(p.emoji || "📖")}</span>
+      <span><span class="label" style="margin:0">Page ${p.number}</span><h2>${esc(p.title || "Untitled")}</h2>
+      <span class="meta">${p.facts.length} fact${p.facts.length === 1 ? "" : "s"} · ${rec ? `${rec} recorded by people, ` : ""}${au - rec} AI voice${au - rec === 1 ? "" : "s"}${p.facts.length - au ? `, ${p.facts.length - au} without sound` : ""}</span></span>
+      <span class="chev">›</span></a>`;
+  }).join("");
+  $("#app").innerHTML = `
+    <p class="label">The book</p>
+    <h1>Every <em>page</em></h1>
+    <p class="sub">Each page has a sticker in the book. Tap a page to change its name, its facts or its recordings.</p>
+    <div class="list">${rows || `<p class="empty">No pages yet.</p>`}</div>
+    <div class="btns"><a class="btn" href="#/new">+ New page</a></div>`;
+}
+
+function renderPage(num) {
+  const p = DATA.pages.find((x) => x.number === num);
+  if (!p) { location.hash = "#/"; return; }
+  const tagUrl = `${location.origin}/p/${p.number}`;
+  $("#app").innerHTML = `
+    <a class="back" href="#/">‹ All pages</a>
+    <p class="label">Page ${p.number}</p>
+    <h1>${esc(p.emoji)} ${esc(p.title || "Untitled")}</h1>
+    <p class="sub">Changes go live on the site about a minute after you save.</p>
+
+    <div class="card">
+      <p class="label">Page details</p>
+      <div class="grid">
+        <div><label class="f" for="em">Emoji</label><input type="text" id="em" value="${esc(p.emoji)}" maxlength="8"></div>
+        <div><label class="f" for="ti">Name</label><input type="text" id="ti" value="${esc(p.title)}" maxlength="80"></div>
+      </div>
+      <div class="field"><label class="f" for="bl">One-line description</label><input type="text" id="bl" value="${esc(p.blurb)}" maxlength="200"></div>
+      <div class="btns"><button class="btn" id="savep" disabled>Save page details</button></div>
+    </div>
+
+    <div class="card">
+      <p class="label">Picture <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional, shown above every fact)</span></p>
+      ${p.cover ? `<img class="cover" src="${fileUrl(p.cover)}" alt="">` : ""}
+      <div class="btns" id="picbtns"><button class="btn ghost" id="pic">${p.cover ? "Replace picture" : "Add a picture"}</button>${p.cover ? `<button class="btn danger" id="picdel">Remove</button>` : ""}</div>
+    </div>
+
+    <div class="card">
+      <p class="label">Sticker address</p>
+      <div class="url"><code>${esc(tagUrl)}</code><button class="btn quiet" id="copy">Copy</button></div>
+      <p class="hint">Write this on page ${p.number}'s sticker. Every tap shows a different fact.</p>
+    </div>
+
+    <p class="label" style="margin-top:2rem">Facts</p>
+    <div id="facts"></div>
+    <div class="fact" id="newfact">
+      <div class="fhead"><span class="label" style="margin:0">New fact</span></div>
+      <textarea id="nf" placeholder="Something wonderful about ${esc((p.title || "this page").toLowerCase())}…"></textarea>
+      <p class="hint">**bold** and *italic* work.</p>
+      <div id="nfstage"></div>
+      <div class="btns" style="margin-top:.75rem"><button class="btn" id="addf" disabled>Add fact</button><button class="btn ghost" id="nfrec">Attach a recording</button></div>
+    </div>`;
+
+  // --- page details
+  const ti = $("#ti"), bl = $("#bl"), em = $("#em"), savep = $("#savep");
+  const dirty = () => (savep.disabled = !ti.value.trim() || (ti.value === p.title && bl.value === p.blurb && em.value === p.emoji));
+  [ti, bl, em].forEach((i) => i.addEventListener("input", dirty));
+  savep.addEventListener("click", () => busy(savep, async () => {
+    const title = ti.value.trim();
+    const changes = [];
+    const want = `${p.number}-${slugify(title)}`;
+    let target = p;
+    if (want !== p.folder) { // keep the folder name in step with the page name (the number never changes)
+      for (const f of p.files) changes.push({ path: `content/${want}/${f.name}`, sha: f.sha }, { path: pagePath(p, f.name), delete: true });
+      target = { ...p, folder: want };
+    }
+    changes.push({ path: pagePath(target, "page.md"), content: b64text(pageMd(title, bl.value, em.value)) });
+    await save(`Page ${p.number}: ${title}`, changes);
+    toast("Saved. Live in about a minute.");
+  }));
+
+  // --- picture
+  const picInput = document.createElement("input"); picInput.type = "file"; picInput.accept = "image/*"; $("#picbtns").appendChild(picInput);
+  $("#pic").addEventListener("click", () => picInput.click());
+  picInput.addEventListener("change", () => {
+    const file = picInput.files[0]; if (!file) return;
+    busy($("#pic"), async () => {
+      const jpg = await toJpeg(file);
+      const old = p.files.filter((f) => /^cover\./.test(f.name) && f.name !== "cover.jpg");
+      await save(`Page ${p.number}: new picture`, [{ path: pagePath(p, "cover.jpg"), content: b64(jpg) }, ...old.map((f) => ({ path: pagePath(p, f.name), delete: true }))]);
+      toast("Picture saved.");
+    });
+  });
+  $("#picdel")?.addEventListener("click", () => {
+    if (!confirm("Remove this page's picture?")) return;
+    busy($("#picdel"), () => save(`Page ${p.number}: remove picture`, [{ path: pagePath(p, p.cover.name), delete: true }]));
+  });
+  $("#copy").addEventListener("click", async () => { try { await navigator.clipboard.writeText(tagUrl); toast("Copied."); } catch { toast(tagUrl); } });
+
+  // --- facts
+  const wrap = $("#facts");
+  for (const f of p.facts) wrap.appendChild(factCard(p, f));
+
+  // --- new fact
+  const nf = $("#nf"), addf = $("#addf");
+  let nfAudio = null;
+  nf.addEventListener("input", () => (addf.disabled = !nf.value.trim()));
+  const pickNew = recordingPicker($("#newfact"), (bytes, secs, url) => {
+    nfAudio = { bytes };
+    $("#nfstage").innerHTML = `<div class="stage"><span class="badge rec">New recording · ${secs.toFixed(0)}s</span><audio controls src="${url}"></audio>
+      <label class="f" for="nfby" style="margin-top:.5rem">Read by (optional)</label><input type="text" id="nfby" placeholder="e.g. Grandma" maxlength="40"></div>`;
+    $("#nfrec").textContent = "Choose a different recording";
+  });
+  $("#nfrec").addEventListener("click", pickNew);
+  addf.addEventListener("click", () => busy(addf, async () => {
+    const max = p.facts.reduce((m, f) => Math.max(m, Number(f.stem)), 0);
+    const stem = pad(max + 1);
+    const changes = [{ path: pagePath(p, `${stem}.md`), content: b64text(nf.value.trim() + "\n") }];
+    if (nfAudio) changes.push(...audioChanges(p, stem, nfAudio.bytes, $("#nfby")?.value || ""));
+    await save(`Page ${p.number}: new fact ${stem}`, changes);
+    toast(nfAudio ? "Fact added." : "Fact added. It'll show as text until it gets a recording.");
+  }));
+}
+
+function factCard(p, f) {
+  const el = document.createElement("div");
+  el.className = "fact";
+  const isAI = f.audio && !f.recording;
+  const badge = f.recording ? `<span class="badge rec">Recorded${f.recording.by ? " by " + esc(f.recording.by) : ""}</span>`
+    : f.audio ? `<span class="badge">AI voice</span>` : `<span class="badge">No sound yet</span>`;
+  el.innerHTML = `
+    <div class="fhead"><span class="label" style="margin:0">Fact ${Number(f.stem)}</span>${badge}</div>
+    <textarea>${esc(f.text)}</textarea>
+    ${f.audio ? `<audio controls preload="none" src="${fileUrl(f.audio)}"></audio>` : ""}
+    <div class="textopts" hidden>${f.audio ? `<label class="check"><input type="checkbox" class="dropaudio" ${isAI ? "checked" : ""}> Remove the current ${isAI ? "AI reading" : "recording"} (it still says the old words)</label>` : ""}</div>
+    <div class="stagebox"></div>
+    <div class="btns" style="margin-top:.75rem">
+      <button class="btn savef" hidden>Save changes</button>
+      <button class="btn ghost rec">${f.recording ? "Replace recording" : "Upload a recording"}</button>
+      ${f.audio ? `<button class="btn quiet unrec">Remove sound</button>` : ""}
+      <span style="flex:1"></span>
+      <button class="btn danger del">Delete fact</button>
+    </div>`;
+  const ta = $("textarea", el), savef = $(".savef", el), opts = $(".textopts", el);
+  ta.addEventListener("input", () => { const d = ta.value.trim() !== f.text.trim() && ta.value.trim(); savef.hidden = !d; opts.hidden = !d; });
+  savef.addEventListener("click", () => busy(savef, async () => {
+    const changes = [{ path: pagePath(p, `${f.stem}.md`), content: b64text(ta.value.trim() + "\n") }];
+    if (f.audio && $(".dropaudio", el)?.checked) {
+      changes.push({ path: pagePath(p, f.audio.name), delete: true });
+      if (f.recording) changes.push(recordingsChange((r) => delete r[`${p.number}/${f.stem}`]));
+    }
+    await save(`Page ${p.number}: edit fact ${f.stem}`, changes);
+    toast("Saved.");
+  }));
+  const pick = recordingPicker(el, (bytes, secs, url) => {
+    $(".stagebox", el).innerHTML = `<div class="stage"><span class="badge rec">New recording · ${secs.toFixed(0)}s</span><audio controls src="${url}"></audio>
+      <label class="f" style="margin-top:.5rem">Read by (optional)</label><input type="text" class="by" placeholder="e.g. Grandma" maxlength="40" value="${esc(f.recording?.by || "")}">
+      <div class="btns" style="margin-top:.75rem"><button class="btn keep">Save recording</button><button class="btn quiet cancel">Cancel</button></div></div>`;
+    $(".cancel", el).addEventListener("click", () => ($(".stagebox", el).innerHTML = ""));
+    $(".keep", el).addEventListener("click", (e) => busy(e.target, async () => {
+      await save(`Page ${p.number}: recording for fact ${f.stem}`, audioChanges(p, f.stem, bytes, $(".by", el).value));
+      toast("Recording saved. Live in about a minute.");
+    }));
+  });
+  $(".rec", el).addEventListener("click", pick);
+  $(".unrec", el)?.addEventListener("click", (e) => {
+    if (!confirm(`Remove the sound from fact ${Number(f.stem)}? It'll show as text only.`)) return;
+    const changes = [{ path: pagePath(p, f.audio.name), delete: true }];
+    if (f.recording) changes.push(recordingsChange((r) => delete r[`${p.number}/${f.stem}`]));
+    busy(e.target, () => save(`Page ${p.number}: remove sound from fact ${f.stem}`, changes));
+  });
+  $(".del", el).addEventListener("click", (e) => {
+    if (p.facts.length === 1) { toast("A page needs at least one fact, or its sticker stops working. Add another first."); return; }
+    if (!confirm(`Delete fact ${Number(f.stem)} and its sound?`)) return;
+    const changes = p.files.filter((x) => x.name.startsWith(f.stem + ".")).map((x) => ({ path: pagePath(p, x.name), delete: true }));
+    if (f.recording) changes.push(recordingsChange((r) => delete r[`${p.number}/${f.stem}`]));
+    busy(e.target, () => save(`Page ${p.number}: delete fact ${f.stem}`, changes));
+  });
+  return el;
+}
+
+function renderNew() {
+  const n = DATA.pages.reduce((m, p) => Math.max(m, p.number), 0) + 1;
+  $("#app").innerHTML = `
+    <a class="back" href="#/">‹ All pages</a>
+    <p class="label">Page ${n}</p>
+    <h1>A new <em>page</em></h1>
+    <p class="sub">Its sticker address will be <code>${esc(location.origin)}/p/${n}</code>. You can add more facts and recordings after.</p>
+    <div class="card">
+      <div class="grid">
+        <div><label class="f" for="em">Emoji</label><input type="text" id="em" maxlength="8" placeholder="🐙"></div>
+        <div><label class="f" for="ti">Name</label><input type="text" id="ti" maxlength="80" placeholder="Octopuses"></div>
+      </div>
+      <div class="field"><label class="f" for="bl">One-line description</label><input type="text" id="bl" maxlength="200" placeholder="Eight arms and three hearts."></div>
+      <div class="field"><label class="f" for="ff">First fact</label><textarea id="ff"></textarea></div>
+      <div class="btns"><button class="btn" id="create" disabled>Create page ${n}</button></div>
+    </div>`;
+  const ti = $("#ti"), ff = $("#ff"), create = $("#create");
+  const ok = () => (create.disabled = !ti.value.trim() || !ff.value.trim());
+  ti.addEventListener("input", ok); ff.addEventListener("input", ok);
+  create.addEventListener("click", () => busy(create, async () => {
+    const folder = `${n}-${slugify(ti.value)}`;
+    await save(`Page ${n}: ${ti.value.trim()}`, [
+      { path: `content/${folder}/page.md`, content: b64text(pageMd(ti.value, $("#bl").value, $("#em").value)) },
+      { path: `content/${folder}/01.md`, content: b64text(ff.value.trim() + "\n") },
+    ]);
+    location.hash = `#/page/${n}`;
+    toast(`Page ${n} created.`);
+  }));
+}
+
+function route(scroll = true) {
+  if (!DATA) return;
+  const h = location.hash;
+  const m = /^#\/page\/(\d+)/.exec(h);
+  if (m) renderPage(Number(m[1]));
+  else if (h === "#/new") renderNew();
+  else renderHome();
+  if (scroll) window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", () => route());
+const grow = (t) => { t.style.height = "auto"; t.style.height = t.scrollHeight + 2 + "px"; };
+document.addEventListener("input", (e) => e.target.tagName === "TEXTAREA" && grow(e.target));
+new MutationObserver(() => document.querySelectorAll("textarea").forEach(grow)).observe(document.getElementById("app"), { childList: true });
+$("#logout").addEventListener("click", async () => { await fetch("/api/login", { method: "DELETE" }); DATA = null; renderLogin(); });
+
+(async () => {
+  try { await load(); route(); }
+  catch (e) { if (DATA === null && !/log in/i.test(e.message)) renderLogin(e.message); }
+})();
+</script>
+</body>
+</html>
