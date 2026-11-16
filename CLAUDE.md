@@ -13,7 +13,7 @@ audio. Static site, deployed by Vercel from `main`.
 - `content/<N>-<name>/` — the book pages. The number is the tag URL (`/p/N`)
   and must never change once a sticker is written; the name is cosmetic.
 - `build.mjs` — the whole build, no dependencies. `npm run build` → `dist/`.
-  Pages use the "Linen" design (cream linen texture, Inter, sage green).
+  Pages use cool white (charcoal in dark mode), Inter, and a sage green accent.
 - `admin/index.html` + `api/` — the `/admin` dashboard. Password login
   (`ADMIN_PASSWORD`), and every save is a commit to `main` through the GitHub
   API (`GITHUB_TOKEN`). `record/index.html` is the family page at `/record`

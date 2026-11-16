@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;1,14..32,300&display=swap">
 <style>
-:root{--bg:#f5efe4;--surface:#fdf8f1;--raised:#f0e8da;--border:#e0d5c4;--accent:#4d6e5e;--accent-ink:#fff;--accent-light:#eaf0eb;--accent-mid:#9abfae;--text:#2a2218;--muted:#9a8e7e;--faint:#c4b8a6;--danger:#a4553f;--danger-light:#f6e6df;--weave:rgba(160,130,90,.05);--shadow-sm:0 1px 2px rgba(42,34,24,.06),0 2px 6px rgba(42,34,24,.05);--shadow-md:0 2px 8px rgba(42,34,24,.07),0 6px 28px rgba(42,34,24,.08);color-scheme:light dark}
-@media(prefers-color-scheme:dark){:root{--bg:#1c1915;--surface:#25211c;--raised:#2d2822;--border:#3a342c;--accent:#9abfae;--accent-ink:#1c1915;--accent-light:#26302b;--accent-mid:#5f7d6f;--text:#efe7da;--muted:#a3978a;--faint:#6f665b;--danger:#e09a83;--danger-light:#3a2620;--weave:rgba(240,220,190,.025);--shadow-sm:0 1px 2px rgba(0,0,0,.25);--shadow-md:0 2px 8px rgba(0,0,0,.25),0 6px 28px rgba(0,0,0,.3)}}
+:root{--bg:#f7f9f8;--surface:#ffffff;--raised:#eef3f1;--border:#dde5e1;--accent:#4d6e5e;--accent-ink:#fff;--accent-light:#e8f0ec;--accent-mid:#9abfae;--text:#1f2a26;--muted:#75857f;--faint:#a6b4ae;--danger:#b04a3c;--danger-light:#f8e6e3;--weave:transparent;--shadow-sm:0 1px 2px rgba(31,42,38,.05),0 2px 6px rgba(31,42,38,.04);--shadow-md:0 2px 8px rgba(31,42,38,.06),0 6px 28px rgba(31,42,38,.07);color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--bg:#151917;--surface:#1e2421;--raised:#262d2a;--border:#323b37;--accent:#9abfae;--accent-ink:#151917;--accent-light:#22302a;--accent-mid:#5f7d6f;--text:#e8eeeb;--muted:#98a6a0;--faint:#5f6b66;--danger:#e09a83;--danger-light:#3a2522;--weave:transparent;--shadow-sm:0 1px 2px rgba(0,0,0,.25);--shadow-md:0 2px 8px rgba(0,0,0,.25),0 6px 28px rgba(0,0,0,.3)}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background-color:var(--bg);background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px),repeating-linear-gradient(90deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px);color:var(--text);font:16px/1.5 "Inter",system-ui,-apple-system,sans-serif;min-height:100svh}
@@ -51,7 +51,7 @@ input:focus{outline:2px solid var(--accent-mid);outline-offset:0;border-color:va
 .mic svg{width:2.2rem;height:2.2rem}
 .mic.stop{background:var(--text);color:var(--bg)}
 .mic.stop svg{width:1.6rem;height:1.6rem}
-.mic.live{animation:ring 1.4s infinite}@keyframes ring{0%{box-shadow:0 0 0 0 rgba(164,85,63,.45)}100%{box-shadow:0 0 0 1.1rem rgba(164,85,63,0)}}
+.mic.live{animation:ring 1.4s infinite}@keyframes ring{0%{box-shadow:0 0 0 0 rgba(176,74,60,.45)}100%{box-shadow:0 0 0 1.1rem rgba(176,74,60,0)}}
 .timer{font-variant-numeric:tabular-nums;font-size:1.1rem;margin:.9rem 0 0;color:var(--muted)}
 audio{width:100%;margin:.25rem 0 1rem}
 .recbox .btns{justify-content:center}
