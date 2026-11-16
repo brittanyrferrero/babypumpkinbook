@@ -1,7 +1,7 @@
 // Builds the static site from content/ into dist/.
 //
 //   content/<N>-<name>/      -> book page N; the name is for humans only
-//   content/<N>-<name>/page.md   -> "# Title" on the first line, optional blurb, optional "emoji: 🐘"
+//   content/<N>-<name>/page.md   -> "# Title" on the first line, optional blurb
 //   content/<N>-<name>/NN.md     -> one fact per file (01.md, 02.md, ...)
 //   content/<N>-<name>/NN.mp3    -> optional audio for that fact (mp3, m4a, mp4, ogg, wav; mp4 plays as sound only)
 //   content/<N>-<name>/cover.*   -> optional picture shown on the page (jpg, png, webp)
@@ -48,13 +48,13 @@ function readPage(folder) {
   const slug = slugOf(folder);
   const dir = join(CONTENT, folder);
   const files = readdirSync(dir).sort();
-  let title = slug, blurb = "", emoji = "";
+  let title = slug, blurb = "";
   if (files.includes("page.md")) {
     const lines = readFileSync(join(dir, "page.md"), "utf8").split("\n");
     const h = lines.findIndex((l) => l.startsWith("# "));
     if (h >= 0) { title = lines[h].slice(2).trim(); lines.splice(h, 1); }
     const e = lines.findIndex((l) => /^emoji:\s*/.test(l));
-    if (e >= 0) { emoji = esc(lines[e].replace(/^emoji:\s*/, "").trim()); lines.splice(e, 1); }
+    if (e >= 0) lines.splice(e, 1); // old "emoji:" lines are ignored
     blurb = lines.join("\n").trim();
   }
   const cover = files.find((f) => f.startsWith("cover.") && IMAGE_EXT.includes(extname(f).toLowerCase()));
@@ -66,7 +66,7 @@ function readPage(folder) {
       const audio = files.find((a) => a.startsWith(stem + ".") && AUDIO_EXT.includes(extname(a).toLowerCase()));
       return { n, html: md(readFileSync(join(dir, f), "utf8")), audio };
     });
-  return { slug, folder, title, blurb, emoji, cover, facts };
+  return { slug, folder, title, blurb, cover, facts };
 }
 
 const folders = readdirSync(CONTENT).filter((d) => !d.startsWith("_") && !d.startsWith(".") && statSync(join(CONTENT, d)).isDirectory());
@@ -85,7 +85,6 @@ const CSS = `
 body{margin:0;background-color:var(--bg);background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px),repeating-linear-gradient(90deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px);color:var(--text);font-family:"Inter",system-ui,-apple-system,sans-serif;line-height:1.5;min-height:100svh;display:flex;flex-direction:column}
 main{flex:1;width:100%;max-width:36rem;margin:0 auto;padding:2.25rem 1.25rem 2rem}
 .label{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 .75rem}
-.tile{display:inline-grid;place-items:center;width:3.75rem;height:3.75rem;font-size:2rem;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);margin:0 0 1.1rem}
 h1{font-size:2.4rem;font-weight:300;letter-spacing:-.03em;line-height:1.1;margin:0 0 .4rem}
 h1 em{font-style:italic;color:var(--accent)}
 .blurb{color:var(--muted);margin:0 0 1.5rem;font-size:1.02rem}
@@ -102,9 +101,8 @@ h1 em{font-style:italic;color:var(--accent)}
 footer{text-align:center;color:var(--faint);font-size:.66rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:1rem 1.25rem 1.8rem}
 footer a{color:inherit}
 ul.pages{list-style:none;padding:0;margin:1.5rem 0 0;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden}
-ul.pages li{display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:center;padding:.95rem 1.1rem;border-top:1px solid var(--border)}
+ul.pages li{padding:.95rem 1.1rem;border-top:1px solid var(--border)}
 ul.pages li:first-child{border-top:0}
-ul.pages .em{font-size:1.6rem}
 ul.pages a{color:inherit;text-decoration:none;font-weight:500;font-size:1.05rem}
 ul.pages small{display:block;color:var(--muted);margin-top:.15rem;font-size:.8rem}
 code{background:var(--raised);border-radius:6px;padding:.1em .4em;font-size:.88em}
@@ -175,8 +173,7 @@ function factPage(p, f) {
     : "";
   return shell({
     title: `${p.title} · fact ${f.n}`,
-    body: `${p.emoji ? `<div class="tile" aria-hidden="true">${p.emoji}</div>` : ""}
-<h1>${esc(p.title)}</h1>
+    body: `<h1>${esc(p.title)}</h1>
 ${p.blurb ? `<p class="blurb">${inline(p.blurb)}</p>` : ""}
 ${cover}
 <div class="fact">${f.html}</div>
@@ -210,7 +207,7 @@ function randomAnyPage() {
 }
 
 function indexPage() {
-  const items = pages.map((p) => `<li><span class="em" aria-hidden="true">${p.emoji || "📖"}</span><div><a href="/p/${p.slug}">Page ${esc(p.slug)} · ${esc(p.title)}</a><small>${p.facts.length} fact${p.facts.length === 1 ? "" : "s"}${p.facts.filter((f) => f.audio).length ? `, ${p.facts.filter((f) => f.audio).length} with audio` : ""} · tag URL: <code>/p/${p.slug}</code></small></div></li>`).join("\n");
+  const items = pages.map((p) => `<li><div><a href="/p/${p.slug}">Page ${esc(p.slug)} · ${esc(p.title)}</a><small>${p.facts.length} fact${p.facts.length === 1 ? "" : "s"}${p.facts.filter((f) => f.audio).length ? `, ${p.facts.filter((f) => f.audio).length} with audio` : ""} · tag URL: <code>/p/${p.slug}</code></small></div></li>`).join("\n");
   return shell({
     title: "Pumpkin's book of wonders",
     body: `<p class="label">For the grown-ups</p><h1>Pumpkin's book of <em>wonders</em></h1>

@@ -18,7 +18,7 @@ about a minute.
 ## The dashboard (easiest way to edit)
 
 Go to `/admin` on the site and log in with the shared password. From there you
-can rename pages, change their emoji and description, add a picture, add, edit
+can rename pages, change their description, add a picture, add, edit
 or delete facts, and upload recordings (any audio file or a phone video; only
 the sound is kept). Each save is a commit to this repo, so the site updates
 about a minute later, the same as any other push. The header shows
@@ -45,7 +45,7 @@ the name after the dash is just for us:
 ```
 content/
   3-ocean/
-    page.md      "# Title" on the first line, an optional one-line blurb, and an optional "emoji: 🌊" line
+    page.md      "# Title" on the first line, an optional one-line blurb
     01.md        one fact per file, numbered. Plain text; **bold** and *italic* work.
     01.mp3       the audio for fact 01 (optional; mp3, m4a, mp4, ogg or wav; mp4 plays as sound only)
     02.md

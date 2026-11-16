@@ -26,14 +26,14 @@ export async function GET(req) {
       const m = /^content\/((\d+)-[^/]+)\/([^/]+)$/.exec(f.path);
       if (!m) continue;
       const [, folder, num, name] = m;
-      const p = (pages[folder] ||= { folder, number: Number(num), title: "", blurb: "", emoji: "", cover: null, files: [], facts: {} });
+      const p = (pages[folder] ||= { folder, number: Number(num), title: "", blurb: "", cover: null, files: [], facts: {} });
       p.files.push({ name, sha: f.sha, size: f.size });
       if (name === "page.md") {
         const lines = texts[f.path].split("\n");
         const h = lines.findIndex((l) => l.startsWith("# "));
         if (h >= 0) { p.title = lines[h].slice(2).trim(); lines.splice(h, 1); }
         const e = lines.findIndex((l) => /^emoji:\s*/.test(l));
-        if (e >= 0) { p.emoji = lines[e].replace(/^emoji:\s*/, "").trim(); lines.splice(e, 1); }
+        if (e >= 0) lines.splice(e, 1); // old "emoji:" lines are ignored
         p.blurb = lines.join("\n").trim();
       } else if (/^cover\./.test(name)) {
         p.cover = { name, sha: f.sha };

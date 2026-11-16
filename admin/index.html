@@ -32,10 +32,9 @@ h2{font-weight:500;font-size:1rem;margin:0}
 .sub{color:var(--muted);margin:0 0 1.75rem}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);padding:1.25rem;margin:0 0 1rem}
 .list{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden;margin:0 0 1rem}
-.row{display:grid;grid-template-columns:2.75rem 1fr auto;gap:.9rem;align-items:center;padding:.9rem 1.1rem;border-top:1px solid var(--border);color:inherit;text-decoration:none}
+.row{display:grid;grid-template-columns:1fr auto;gap:.9rem;align-items:center;padding:.9rem 1.1rem;border-top:1px solid var(--border);color:inherit;text-decoration:none}
 .row:first-child{border-top:0}
 .row:hover{background:var(--raised)}
-.em{display:grid;place-items:center;width:2.75rem;height:2.75rem;border-radius:12px;background:var(--raised);font-size:1.5rem}
 .meta{color:var(--muted);font-size:.8rem}
 .chev{color:var(--faint);font-size:1.2rem}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:.55rem 1.05rem;font:inherit;font-size:.88rem;font-weight:500;cursor:pointer;text-decoration:none;white-space:nowrap}
@@ -48,7 +47,6 @@ label.f{display:block;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-
 input[type=text],input[type=password],textarea{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.6rem .75rem}
 input:focus,textarea:focus{outline:2px solid var(--accent-mid);outline-offset:0;border-color:var(--accent-mid)}
 textarea{resize:vertical;min-height:5.5rem;line-height:1.5}
-.grid{display:grid;grid-template-columns:5rem 1fr;gap:.9rem;margin:0 0 .9rem}
 .field{margin:0 0 .9rem}
 .hint{color:var(--muted);font-size:.8rem;margin:.35rem 0 0}
 .fact{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);padding:1.1rem 1.1rem 1rem;margin:0 0 .85rem}
@@ -67,7 +65,7 @@ audio{width:100%;height:2.4rem;margin:.7rem 0 .2rem}
 .login{max-width:22rem;margin:12vh auto 0}
 .empty{color:var(--muted);text-align:center;padding:3rem 0}
 input[type=file]{display:none}
-@media(max-width:520px){.grid{grid-template-columns:4rem 1fr}header{padding:.75rem 1rem}.hide-sm{display:none}}
+@media(max-width:520px){header{padding:.75rem 1rem}.hide-sm{display:none}}
 </style>
 </head>
 <body>
@@ -203,7 +201,7 @@ async function toJpeg(file) {
 
 // ---------------------------------------------------------------- helpers for changes
 const pagePath = (p, name) => `content/${p.folder}/${name}`;
-const pageMd = (title, blurb, emoji) => `# ${title.trim()}\n${blurb.trim() ? blurb.trim() + "\n" : ""}${emoji.trim() ? "emoji: " + emoji.trim() + "\n" : ""}`;
+const pageMd = (title, blurb) => `# ${title.trim()}\n${blurb.trim() ? blurb.trim() + "\n" : ""}`;
 function recordingsChange(mutate) {
   const r = JSON.parse(JSON.stringify(DATA.recordings || {})); mutate(r);
   const sorted = Object.fromEntries(Object.keys(r).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map((k) => [k, r[k]]));
@@ -264,7 +262,6 @@ function renderHome() {
   const rows = pages.map((p) => {
     const rec = p.facts.filter((f) => f.recording).length, au = p.facts.filter((f) => f.audio).length;
     return `<a class="row" href="#/page/${p.number}">
-      <span class="em">${esc(p.emoji || "📖")}</span>
       <span><span class="label" style="margin:0">Page ${p.number}</span><h2>${esc(p.title || "Untitled")}</h2>
       <span class="meta">${p.facts.length} fact${p.facts.length === 1 ? "" : "s"} · ${rec ? `${rec} recorded by people, ` : ""}${au - rec} AI voice${au - rec === 1 ? "" : "s"}${p.facts.length - au ? `, ${p.facts.length - au} without sound` : ""}</span></span>
       <span class="chev">›</span></a>`;
@@ -284,15 +281,12 @@ function renderPage(num) {
   $("#app").innerHTML = `
     <a class="back" href="#/">‹ All pages</a>
     <p class="label">Page ${p.number}</p>
-    <h1>${esc(p.emoji)} ${esc(p.title || "Untitled")}</h1>
+    <h1>${esc(p.title || "Untitled")}</h1>
     <p class="sub">Changes go live on the site about a minute after you save.</p>
 
     <div class="card">
       <p class="label">Page details</p>
-      <div class="grid">
-        <div><label class="f" for="em">Emoji</label><input type="text" id="em" value="${esc(p.emoji)}" maxlength="8"></div>
-        <div><label class="f" for="ti">Name</label><input type="text" id="ti" value="${esc(p.title)}" maxlength="80"></div>
-      </div>
+      <div class="field"><label class="f" for="ti">Name</label><input type="text" id="ti" value="${esc(p.title)}" maxlength="80"></div>
       <div class="field"><label class="f" for="bl">One-line description</label><input type="text" id="bl" value="${esc(p.blurb)}" maxlength="200"></div>
       <div class="btns"><button class="btn" id="savep" disabled>Save page details</button></div>
     </div>
@@ -320,9 +314,9 @@ function renderPage(num) {
     </div>`;
 
   // --- page details
-  const ti = $("#ti"), bl = $("#bl"), em = $("#em"), savep = $("#savep");
-  const dirty = () => (savep.disabled = !ti.value.trim() || (ti.value === p.title && bl.value === p.blurb && em.value === p.emoji));
-  [ti, bl, em].forEach((i) => i.addEventListener("input", dirty));
+  const ti = $("#ti"), bl = $("#bl"), savep = $("#savep");
+  const dirty = () => (savep.disabled = !ti.value.trim() || (ti.value === p.title && bl.value === p.blurb));
+  [ti, bl].forEach((i) => i.addEventListener("input", dirty));
   savep.addEventListener("click", () => busy(savep, async () => {
     const title = ti.value.trim();
     const changes = [];
@@ -332,7 +326,7 @@ function renderPage(num) {
       for (const f of p.files) changes.push({ path: `content/${want}/${f.name}`, sha: f.sha }, { path: pagePath(p, f.name), delete: true });
       target = { ...p, folder: want };
     }
-    changes.push({ path: pagePath(target, "page.md"), content: b64text(pageMd(title, bl.value, em.value)) });
+    changes.push({ path: pagePath(target, "page.md"), content: b64text(pageMd(title, bl.value)) });
     await save(`Page ${p.number}: ${title}`, changes);
     toast("Saved. Live in about a minute.");
   }));
@@ -445,10 +439,7 @@ function renderNew() {
     <h1>A new <em>page</em></h1>
     <p class="sub">Its sticker address will be <code>${esc(location.origin)}/p/${n}</code>. You can add more facts and recordings after.</p>
     <div class="card">
-      <div class="grid">
-        <div><label class="f" for="em">Emoji</label><input type="text" id="em" maxlength="8" placeholder="🐙"></div>
-        <div><label class="f" for="ti">Name</label><input type="text" id="ti" maxlength="80" placeholder="Octopuses"></div>
-      </div>
+      <div class="field"><label class="f" for="ti">Name</label><input type="text" id="ti" maxlength="80" placeholder="Octopuses"></div>
       <div class="field"><label class="f" for="bl">One-line description</label><input type="text" id="bl" maxlength="200" placeholder="Eight arms and three hearts."></div>
       <div class="field"><label class="f" for="ff">First fact</label><textarea id="ff"></textarea></div>
       <div class="btns"><button class="btn" id="create" disabled>Create page ${n}</button></div>
@@ -459,7 +450,7 @@ function renderNew() {
   create.addEventListener("click", () => busy(create, async () => {
     const folder = `${n}-${slugify(ti.value)}`;
     await save(`Page ${n}: ${ti.value.trim()}`, [
-      { path: `content/${folder}/page.md`, content: b64text(pageMd(ti.value, $("#bl").value, $("#em").value)) },
+      { path: `content/${folder}/page.md`, content: b64text(pageMd(ti.value, $("#bl").value)) },
       { path: `content/${folder}/01.md`, content: b64text(ff.value.trim() + "\n") },
     ]);
     location.hash = `#/page/${n}`;
