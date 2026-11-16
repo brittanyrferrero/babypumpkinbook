@@ -158,7 +158,7 @@ function renderList() {
   $("#app").innerHTML = `
     <p class="label">Facts to record</p>
     <h1>Pick a <em>fact</em></h1>
-    <p class="sub">${todo.length ? `${todo.length} fact${todo.length === 1 ? " is" : "s are"} waiting for a voice. Choose one to record.` : "Every fact has been recorded. Thank you!"}</p>
+    <p class="sub">${todo.length ? `${todo.length} fact${todo.length === 1 ? " is" : "s are"} waiting for a voice. Choose one to record. You'll hear it back and can redo it before you submit.` : "Every fact has been recorded. Thank you!"}</p>
     ${todo.length ? `<div class="list">${todo.map((x) => `<a class="row" href="#/fact/${x.page.number}/${x.fact.stem}">${row(x)}<span class="chev">›</span></a>`).join("")}</div>` : ""}
     ${done.length ? `<p class="label" style="margin-top:2.25rem">Already recorded</p>
     <div class="list done">${done.map((x) => `<div class="row">${row(x)}<span class="meta">${x.fact.recording?.by ? esc(x.fact.recording.by) : ""}</span></div>`).join("")}</div>` : ""}`;
@@ -199,7 +199,7 @@ function drawBox(x) {
   }
   box.innerHTML = `<button class="mic" id="mic" aria-label="Start recording">${MIC}</button>
     <p class="timer" id="timer">Tap to start recording</p>
-    <p class="hint">Read the fact above out loud, then tap again to stop.</p>`;
+    <p class="hint">Read the fact above out loud, then tap again to stop.<br>You can listen back and record again as many times as you like. Nothing is saved until you press Submit.</p>`;
   $("#mic").addEventListener("click", () => startRecording(x));
 }
 
