@@ -1,7 +1,7 @@
 import { requireAuth, allowedPath, commit, json, fail } from "./_lib.js";
 
 // POST { message, changes: [{path, content?|sha?|delete?}] } → one commit to main.
-// Vercel sees the push and redeploys the site about a minute later.
+// Vercel sees the push and redeploys the site about a minute later. Admin only.
 export async function POST(req) {
   const denied = requireAuth(req);
   if (denied) return denied;

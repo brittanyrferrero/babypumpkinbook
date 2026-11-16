@@ -6,7 +6,7 @@ const TYPES = { mp3: "audio/mpeg", m4a: "audio/mp4", mp4: "audio/mp4", ogg: "aud
   jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
 
 export async function GET(req) {
-  const denied = requireAuth(req);
+  const denied = requireAuth(req, ["admin", "recorder"]);
   if (denied) return denied;
   const url = new URL(req.url);
   const sha = url.searchParams.get("sha") || "";

@@ -16,7 +16,9 @@ audio. Static site, deployed by Vercel from `main`.
   Pages use the "Linen" design (cream linen texture, Inter, sage green).
 - `admin/index.html` + `api/` — the `/admin` dashboard. Password login
   (`ADMIN_PASSWORD`), and every save is a commit to `main` through the GitHub
-  API (`GITHUB_TOKEN`). `api/_lib.js` only allows writes to `content/` page,
+  API (`GITHUB_TOKEN`). `record/index.html` is the family page at `/record`
+  (`RECORDER_PASSWORD`): it can only add a person's recording to a fact that
+  lacks one, via `api/record.js`; the role is in the signed cookie. `api/_lib.js` only allows writes to `content/` page,
   fact, audio and picture files. Recordings are converted to mp3 in the browser
   (lamejs) and listed in `content/recordings.json`.
 - `generate_audio.py` / `prep_voice.py` / `voices.json` — AI narration. Runs

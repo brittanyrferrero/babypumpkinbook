@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Record a fact</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;1,14..32,300&display=swap">
+<style>
+:root{--bg:#f5efe4;--surface:#fdf8f1;--raised:#f0e8da;--border:#e0d5c4;--accent:#4d6e5e;--accent-ink:#fff;--accent-light:#eaf0eb;--accent-mid:#9abfae;--text:#2a2218;--muted:#9a8e7e;--faint:#c4b8a6;--danger:#a4553f;--danger-light:#f6e6df;--weave:rgba(160,130,90,.05);--shadow-sm:0 1px 2px rgba(42,34,24,.06),0 2px 6px rgba(42,34,24,.05);--shadow-md:0 2px 8px rgba(42,34,24,.07),0 6px 28px rgba(42,34,24,.08);color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1915;--surface:#25211c;--raised:#2d2822;--border:#3a342c;--accent:#9abfae;--accent-ink:#1c1915;--accent-light:#26302b;--accent-mid:#5f7d6f;--text:#efe7da;--muted:#a3978a;--faint:#6f665b;--danger:#e09a83;--danger-light:#3a2620;--weave:rgba(240,220,190,.025);--shadow-sm:0 1px 2px rgba(0,0,0,.25);--shadow-md:0 2px 8px rgba(0,0,0,.25),0 6px 28px rgba(0,0,0,.3)}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background-color:var(--bg);background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px),repeating-linear-gradient(90deg,transparent,transparent 3px,var(--weave) 3px,var(--weave) 4px);color:var(--text);font:16px/1.5 "Inter",system-ui,-apple-system,sans-serif;min-height:100svh}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:1rem;justify-content:space-between;padding:.85rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{font-weight:300;font-size:1.15rem;letter-spacing:-.02em;color:var(--text);text-decoration:none}
+.brand em{color:var(--accent)}
+.hright{display:flex;align-items:center;gap:.75rem;font-size:.85rem;color:var(--muted)}
+.linkbtn{color:var(--muted);background:none;border:0;font:inherit;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px}
+main{max-width:40rem;margin:0 auto;padding:2rem 1rem 5rem}
+.label{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 .6rem}
+h1{font-weight:300;font-size:2rem;letter-spacing:-.03em;line-height:1.15;margin:0 0 .35rem}
+h1 em{color:var(--accent)}
+.sub{color:var(--muted);margin:0 0 1.75rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);padding:1.25rem;margin:0 0 1rem}
+.list{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden;margin:0 0 1rem}
+.row{display:grid;grid-template-columns:1fr auto;gap:.9rem;align-items:center;padding:.95rem 1.1rem;border-top:1px solid var(--border);color:inherit;text-decoration:none}
+.row:first-child{border-top:0}
+a.row:hover{background:var(--raised)}
+.row p{margin:.15rem 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.done .row{color:var(--muted)}
+.meta{color:var(--muted);font-size:.8rem}
+.chev{color:var(--faint);font-size:1.2rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:.7rem 1.25rem;font:inherit;font-size:.95rem;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn.ghost{background:var(--surface);color:var(--accent);border-color:var(--accent-mid)}
+.btn.danger{background:transparent;color:var(--danger);border-color:var(--border)}
+.btn:disabled{opacity:.45;cursor:default}
+.btns{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+label.f{display:block;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 .35rem}
+input{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.65rem .75rem}
+input:focus{outline:2px solid var(--accent-mid);outline-offset:0;border-color:var(--accent-mid)}
+.field{margin:0 0 .9rem}
+.hint{color:var(--muted);font-size:.85rem;margin:.5rem 0 0}
+.err{color:var(--danger);font-size:.85rem;margin:.5rem 0 0}
+.back{display:inline-block;color:var(--muted);text-decoration:none;font-size:.9rem;margin:0 0 1.25rem}
+.factText{font-size:1.3rem;font-weight:300;line-height:1.55;letter-spacing:-.01em;margin:0}
+.factText strong{font-weight:600}
+.recbox{text-align:center;padding:1.75rem 1.25rem}
+.mic{width:5.5rem;height:5.5rem;border-radius:50%;border:0;background:var(--danger);color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md)}
+.mic svg{width:2.2rem;height:2.2rem}
+.mic.stop{background:var(--text);color:var(--bg)}
+.mic.stop svg{width:1.6rem;height:1.6rem}
+.mic.live{animation:ring 1.4s infinite}@keyframes ring{0%{box-shadow:0 0 0 0 rgba(164,85,63,.45)}100%{box-shadow:0 0 0 1.1rem rgba(164,85,63,0)}}
+.timer{font-variant-numeric:tabular-nums;font-size:1.1rem;margin:.9rem 0 0;color:var(--muted)}
+audio{width:100%;margin:.25rem 0 1rem}
+.recbox .btns{justify-content:center}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.1rem;border-radius:999px;font-size:.9rem;box-shadow:var(--shadow-md);z-index:9;max-width:calc(100% - 2rem)}
+.empty{color:var(--muted);text-align:center;padding:2rem 1rem}
+.login{max-width:22rem;margin:10vh auto 0}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">Pumpkin's book · <em>record</em></span>
+  <div class="hright"><span id="who"></span><button class="linkbtn" id="logout" hidden>Log out</button></div>
+</header>
+<main id="app"><p class="empty">Loading…</p></main>
+<div class="toast" id="toast" hidden></div>
+<script src="/admin/audio.js"></script>
+<script>
+"use strict";
+// The family recording page. Shows the facts nobody has recorded yet; pick
+// one, record it, listen, redo as often as you like, then submit or delete.
+// Facts already recorded by a person are listed at the bottom, read-only.
+// The server (api/record.js) enforces the same rules.
+
+let DATA = null;
+let take = null;          // { bytes, seconds, url } – the unsubmitted recording
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>").replace(/\n+/g, "<br>");
+const plain = (s) => String(s ?? "").replace(/\*+/g, "");
+const MAX_SECONDS = 180;
+const MIC = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z"/></svg>`;
+const STOP = `<svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>`;
+
+function toast(msg, ms = 3500) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), ms);
+}
+const getName = () => { try { return localStorage.getItem("pb-name") || ""; } catch { return ""; } };
+const setName = (n) => { try { localStorage.setItem("pb-name", n); } catch {} };
+function b64(bytes) {
+  let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { "x-pb": "1", ...(opts.body ? { "content-type": "application/json" } : {}) }, credentials: "same-origin" });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && path !== "/api/login") { DATA = null; renderLogin(); throw new Error("Please log in again."); }
+  if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
+  return data;
+}
+
+// A fact needs a person's recording unless it already has one (listed in
+// recordings.json, or a non-mp3 file added by hand). AI clips don't count.
+const isDone = (f) => !!f.recording || (f.audio && !/\.mp3$/.test(f.audio.name));
+function facts() {
+  const all = [];
+  for (const p of DATA.pages) for (const f of p.facts) all.push({ page: p, fact: f, done: isDone(f) });
+  return all;
+}
+// Anything submitted here this session, so it moves to "done" straight away,
+// even before the reload catches up.
+const justDone = new Map();
+
+async function load() {
+  DATA = await api("/api/content");
+  for (const [k, by] of justDone) {
+    const [n, stem] = k.split("/");
+    const f = DATA.pages.find((p) => p.number === Number(n))?.facts.find((x) => x.stem === stem);
+    if (f && !f.recording) f.recording = { by };
+  }
+  $("#logout").hidden = false;
+}
+
+// ---------------------------------------------------------------- views
+function renderLogin(err = "") {
+  $("#logout").hidden = true; $("#who").textContent = "";
+  $("#app").innerHTML = `<form class="login card" id="lf">
+    <p class="label">Pumpkin's book of wonders</p>
+    <h1>Read to <em>Pumpkin</em></h1>
+    <p class="sub" style="margin-bottom:1.1rem">Record facts in your own voice. They'll play when Pumpkin taps a sticker in the book.</p>
+    <div class="field"><label class="f" for="nm">Your name</label><input id="nm" autocomplete="name" maxlength="40" placeholder="e.g. Grandma" required value="${esc(getName())}"></div>
+    <div class="field"><label class="f" for="pw">Family password</label><input type="password" id="pw" autocomplete="current-password" required></div>
+    <div class="btns"><button class="btn" type="submit">Start</button></div>
+    ${err ? `<p class="err">${esc(err)}</p>` : ""}
+  </form>`;
+  $(getName() ? "#pw" : "#nm").focus();
+  $("#lf").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("#lf button"); btn.disabled = true; btn.textContent = "Checking…";
+    setName($("#nm").value.replace(/\s+/g, " ").trim());
+    try { await api("/api/login", { method: "POST", body: JSON.stringify({ password: $("#pw").value }) }); await load(); route(); }
+    catch (e) { renderLogin(e.message); }
+  });
+}
+
+function renderWho() {
+  const n = getName();
+  $("#who").innerHTML = n ? `Recording as <b>${esc(n)}</b> · <button class="linkbtn" id="rename">change</button>` : "";
+  $("#rename")?.addEventListener("click", askName);
+}
+function askName() {
+  $("#app").innerHTML = `<form class="login card" id="nf">
+    <h1>Who's <em>reading?</em></h1>
+    <p class="sub" style="margin-bottom:1.1rem">Your name goes with each recording you make.</p>
+    <div class="field"><input id="nm" autocomplete="name" maxlength="40" placeholder="e.g. Grandma" required value="${esc(getName())}"></div>
+    <div class="btns"><button class="btn" type="submit">Continue</button></div></form>`;
+  $("#nm").focus();
+  $("#nf").addEventListener("submit", (e) => { e.preventDefault(); setName($("#nm").value.replace(/\s+/g, " ").trim()); route(); });
+}
+
+function renderList() {
+  const all = facts();
+  const todo = all.filter((x) => !x.done), done = all.filter((x) => x.done);
+  const row = (x) => `<span><span class="label" style="margin:0">Page ${x.page.number} · ${esc(x.page.title)}</span><p>${esc(plain(x.fact.text))}</p></span>`;
+  $("#app").innerHTML = `
+    <p class="label">Facts to record</p>
+    <h1>Pick a <em>fact</em></h1>
+    <p class="sub">${todo.length ? `${todo.length} fact${todo.length === 1 ? " is" : "s are"} waiting for a voice. Choose one to record.` : "Every fact has been recorded. Thank you!"}</p>
+    ${todo.length ? `<div class="list">${todo.map((x) => `<a class="row" href="#/fact/${x.page.number}/${x.fact.stem}">${row(x)}<span class="chev">›</span></a>`).join("")}</div>` : ""}
+    ${done.length ? `<p class="label" style="margin-top:2.25rem">Already recorded</p>
+    <div class="list done">${done.map((x) => `<div class="row">${row(x)}<span class="meta">${x.fact.recording?.by ? esc(x.fact.recording.by) : ""}</span></div>`).join("")}</div>` : ""}`;
+}
+
+let rec = null; // the live MediaRecorder session
+function stopMic() {
+  if (!rec) return;
+  clearInterval(rec.tick); clearTimeout(rec.limit);
+  rec.stream.getTracks().forEach((t) => t.stop());
+  rec = null;
+}
+function clearTake() { if (take) URL.revokeObjectURL(take.url); take = null; }
+
+function renderFact(num, stem) {
+  const x = facts().find((y) => y.page.number === num && y.fact.stem === stem);
+  if (!x) { location.hash = "#/"; return; }
+  if (x.done) { toast("That fact has already been recorded."); location.hash = "#/"; return; }
+  $("#app").innerHTML = `
+    <a class="back" href="#/">‹ All facts</a>
+    <p class="label">Page ${x.page.number} · ${esc(x.page.title)}</p>
+    <div class="card"><p class="factText">${md(x.fact.text)}</p></div>
+    <div class="card recbox" id="box"></div>`;
+  drawBox(x);
+}
+
+function drawBox(x) {
+  const box = $("#box");
+  if (take) {
+    box.innerHTML = `<p class="label">Your recording · ${Math.round(take.seconds)}s</p>
+      <audio controls src="${take.url}"></audio>
+      <div class="btns"><button class="btn" id="submit">Submit</button><button class="btn ghost" id="again">Record again</button><button class="btn danger" id="del">Delete</button></div>
+      <p class="hint">Happy with it? Submit and it'll play from the sticker in about a minute.</p>`;
+    $("#again").addEventListener("click", () => { clearTake(); startRecording(x); });
+    $("#del").addEventListener("click", () => { clearTake(); drawBox(x); toast("Recording deleted."); });
+    $("#submit").addEventListener("click", () => submit(x));
+    return;
+  }
+  box.innerHTML = `<button class="mic" id="mic" aria-label="Start recording">${MIC}</button>
+    <p class="timer" id="timer">Tap to start recording</p>
+    <p class="hint">Read the fact above out loud, then tap again to stop.</p>`;
+  $("#mic").addEventListener("click", () => startRecording(x));
+}
+
+async function startRecording(x) {
+  if (!window.MediaRecorder || !navigator.mediaDevices?.getUserMedia) { toast("This browser can't record. Try Safari or Chrome.", 6000); return; }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+  catch (e) { toast(e.name === "NotAllowedError" ? "Please allow the microphone so you can record." : "Couldn't find a microphone.", 6000); drawBox(x); return; }
+  if (!location.hash.startsWith(`#/fact/${x.page.number}/${x.fact.stem}`)) { stream.getTracks().forEach((t) => t.stop()); return; } // left while the mic prompt was up
+  const chunks = [];
+  const mr = new MediaRecorder(stream);
+  const started = Date.now();
+  rec = { stream, mr };
+  mr.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+  mr.onstop = async () => {
+    stopMic();
+    if (!location.hash.startsWith(`#/fact/${x.page.number}/${x.fact.stem}`)) return; // they left the page mid-recording
+    const box = $("#box"); if (!box) return;
+    box.innerHTML = `<p class="timer">Getting your recording ready…</p>`;
+    try {
+      const { bytes, seconds } = await toMp3(new Blob(chunks, { type: mr.mimeType || "audio/webm" }));
+      take = { bytes, seconds, url: URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" })) };
+    } catch (e) { toast(/silent/.test(e.message) ? "We didn't hear anything. Check the microphone and try again." : e.message, 6000); }
+    if ($("#box")) drawBox(x);
+  };
+  mr.start(1000);
+  const box = $("#box");
+  box.innerHTML = `<button class="mic stop live" id="mic" aria-label="Stop recording">${STOP}</button>
+    <p class="timer" id="timer">0:00</p><p class="hint">Recording… tap to stop.</p>`;
+  $("#mic").addEventListener("click", () => mr.state !== "inactive" && mr.stop());
+  rec.tick = setInterval(() => { const s = Math.floor((Date.now() - started) / 1000); const t = $("#timer"); if (t) t.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 250);
+  rec.limit = setTimeout(() => { if (mr.state !== "inactive") { mr.stop(); toast("That's the 3 minute limit, so we stopped there."); } }, MAX_SECONDS * 1000);
+}
+
+async function submit(x) {
+  const btn = $("#submit"); btn.disabled = true; btn.textContent = "Sending…";
+  $("#again").disabled = $("#del").disabled = true;
+  try {
+    await api("/api/record", { method: "POST", body: JSON.stringify({ page: x.page.number, stem: x.fact.stem, by: getName(), audio: b64(take.bytes) }) });
+    justDone.set(`${x.page.number}/${x.fact.stem}`, getName());
+    clearTake();
+    toast("Thank you! It'll play from the sticker in about a minute.", 5000);
+    try { await load(); } catch {}
+    location.hash = "#/"; route();
+  } catch (e) {
+    toast(e.message, 6000);
+    btn.disabled = false; btn.textContent = "Submit"; $("#again").disabled = $("#del").disabled = false;
+    if (/already/.test(e.message)) { clearTake(); try { await load(); } catch {} location.hash = "#/"; }
+  }
+}
+
+function route() {
+  if (!DATA) return;
+  stopMic();
+  if (!getName()) { askName(); return; }
+  renderWho();
+  const m = /^#\/fact\/(\d+)\/(\d+)/.exec(location.hash);
+  if (m) renderFact(Number(m[1]), m[2]); else { clearTake(); renderList(); }
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", () => { if (take && !/^#\/fact\//.test(location.hash)) clearTake(); route(); });
+window.addEventListener("beforeunload", (e) => { if (take || rec) { e.preventDefault(); e.returnValue = ""; } });
+$("#logout").addEventListener("click", async () => { stopMic(); clearTake(); await fetch("/api/login", { method: "DELETE" }); DATA = null; renderLogin(); });
+
+(async () => {
+  try { await load(); route(); }
+  catch (e) { if (DATA === null && !/log in/i.test(e.message)) renderLogin(e.message); }
+})();
+</script>
+</body>
+</html>

@@ -4,7 +4,8 @@
 // commit to the GitHub repo, and Vercel redeploys from that like any other
 // push. Env vars (set in Vercel → Project → Settings → Environment Variables):
 //
-//   ADMIN_PASSWORD   the shared dashboard password; also signs the login cookie
+//   ADMIN_PASSWORD   the full dashboard password; also signs the login cookie
+//   RECORDER_PASSWORD optional, the family password for /record (recordings only)
 //   GITHUB_TOKEN     fine-grained token, this repo only, Contents: read & write
 //   GITHUB_REPO      optional, default brittanyrferrero/babypumpkinbook
 //   GITHUB_BRANCH    optional, default main
@@ -22,27 +23,44 @@ export const json = (data, status = 200, headers = {}) =>
 export const fail = (status, error) => json({ error }, status);
 
 // ---------- auth ----------
-function sign(exp) {
-  return createHmac("sha256", process.env.ADMIN_PASSWORD).update(`pb-session:${exp}`).digest("base64url");
+// Two passwords, two roles. ADMIN_PASSWORD opens the full dashboard (/admin).
+// RECORDER_PASSWORD is the family password: it only opens /record, which can
+// add a recording to a fact that doesn't have a person's recording yet.
+// The role is inside the signed cookie, so it can't be changed by the browser.
+function sign(exp, role) {
+  return createHmac("sha256", process.env.ADMIN_PASSWORD).update(`pb-session:${exp}:${role}`).digest("base64url");
 }
 function safeEqual(a, b) {
   const x = Buffer.from(String(a)), y = Buffer.from(String(b));
   return x.length === y.length && timingSafeEqual(x, y);
 }
+// → "admin" | "recorder" | null
 export function checkPassword(pw) {
-  return !!process.env.ADMIN_PASSWORD && safeEqual(pw, process.env.ADMIN_PASSWORD);
+  if (!pw) return null;
+  if (process.env.ADMIN_PASSWORD && safeEqual(pw, process.env.ADMIN_PASSWORD)) return "admin";
+  if (process.env.ADMIN_PASSWORD && process.env.RECORDER_PASSWORD && safeEqual(pw, process.env.RECORDER_PASSWORD)) return "recorder";
+  return null;
 }
-export function sessionCookie() {
+export function sessionCookie(role) {
   const exp = Date.now() + SESSION_DAYS * 864e5;
-  return `${COOKIE}=${exp}.${sign(exp)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_DAYS * 86400}`;
+  return `${COOKIE}=${exp}.${role}.${sign(exp, role)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_DAYS * 86400}`;
 }
 export const clearCookie = () => `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
 
-// Returns an error Response if the request isn't from a logged-in dashboard, else null.
-export function requireAuth(req) {
+// The logged-in role ("admin" | "recorder"), or null.
+export function sessionRole(req) {
+  const m = new RegExp(`(?:^|;\\s*)${COOKIE}=(\\d+)\\.(admin|recorder)\\.([\\w-]+)`).exec(req.headers.get("cookie") || "");
+  if (!m || Number(m[1]) < Date.now() || !safeEqual(m[3], sign(m[1], m[2]))) return null;
+  return m[2];
+}
+
+// Returns an error Response if the request isn't allowed, else null.
+// roles: which roles may call this route (default: admin only).
+export function requireAuth(req, roles = ["admin"]) {
   if (!process.env.ADMIN_PASSWORD || !process.env.GITHUB_TOKEN) return fail(503, "Dashboard isn't set up yet (missing ADMIN_PASSWORD or GITHUB_TOKEN).");
-  const m = new RegExp(`(?:^|;\\s*)${COOKIE}=(\\d+)\\.([\\w-]+)`).exec(req.headers.get("cookie") || "");
-  if (!m || Number(m[1]) < Date.now() || !safeEqual(m[2], sign(m[1]))) return fail(401, "Please log in.");
+  const role = sessionRole(req);
+  if (!role) return fail(401, "Please log in.");
+  if (!roles.includes(role)) return fail(403, "That password can't do this.");
   // Writes must carry a custom header, which a cross-site form can't send.
   if (req.method !== "GET" && req.headers.get("x-pb") !== "1") return fail(403, "Bad request.");
   return null;
@@ -78,13 +96,16 @@ export const allowedPath = (p) => typeof p === "string" && ALLOWED.test(p);
 
 // One commit with any mix of: { path, content (base64) }, { path, sha } (move/copy
 // an existing blob), { path, delete: true }. Retries once if main moved under us.
+// `changes` can also be an async function of the head commit sha, which is
+// called again on retry, for changes that depend on what's currently in main.
 export async function commit(changes, message) {
   for (let attempt = 0; ; attempt++) {
     const ref = await gh(`/git/ref/heads/${BRANCH}`);
     const head = ref.object.sha;
     const headCommit = await gh(`/git/commits/${head}`);
+    const list = typeof changes === "function" ? await changes(head) : changes;
     const tree = [];
-    for (const c of changes) {
+    for (const c of list) {
       if (c.delete) tree.push({ path: c.path, mode: "100644", type: "blob", sha: null });
       else if (c.sha) tree.push({ path: c.path, mode: "100644", type: "blob", sha: c.sha });
       else {

@@ -223,6 +223,8 @@ const out = (rel, text) => { mkdirSync(join(DIST, rel, ".."), { recursive: true 
 
 out("index.html", indexPage());
 out("admin/index.html", readFileSync("admin/index.html", "utf8"));
+out("admin/audio.js", readFileSync("admin/audio.js", "utf8"));
+out("record/index.html", readFileSync("record/index.html", "utf8"));
 out("random/index.html", randomAnyPage());
 const tags = {};
 for (const p of pages) {
